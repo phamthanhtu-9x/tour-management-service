@@ -10,5 +10,7 @@
 export type * from './models/User.js'
 export type * from './models/Tour.js'
 export type * from './models/TourLevel.js'
+export type * from './models/TourControl.js'
 export type * from './models/DefaultLevel.js'
+export type * from './models/Player.js'
 export type * from './commonInputTypes.js'

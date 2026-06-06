@@ -386,7 +386,9 @@ export const ModelName = {
   User: 'User',
   Tour: 'Tour',
   TourLevel: 'TourLevel',
-  DefaultLevel: 'DefaultLevel'
+  TourControl: 'TourControl',
+  DefaultLevel: 'DefaultLevel',
+  Player: 'Player'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -402,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tour" | "tourLevel" | "defaultLevel"
+    modelProps: "user" | "tour" | "tourLevel" | "tourControl" | "defaultLevel" | "player"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -628,6 +630,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TourControl: {
+      payload: Prisma.$TourControlPayload<ExtArgs>
+      fields: Prisma.TourControlFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TourControlFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TourControlFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>
+        }
+        findFirst: {
+          args: Prisma.TourControlFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TourControlFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>
+        }
+        findMany: {
+          args: Prisma.TourControlFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>[]
+        }
+        create: {
+          args: Prisma.TourControlCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>
+        }
+        createMany: {
+          args: Prisma.TourControlCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TourControlCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>[]
+        }
+        delete: {
+          args: Prisma.TourControlDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>
+        }
+        update: {
+          args: Prisma.TourControlUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>
+        }
+        deleteMany: {
+          args: Prisma.TourControlDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TourControlUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TourControlUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>[]
+        }
+        upsert: {
+          args: Prisma.TourControlUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourControlPayload>
+        }
+        aggregate: {
+          args: Prisma.TourControlAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTourControl>
+        }
+        groupBy: {
+          args: Prisma.TourControlGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TourControlGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TourControlCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TourControlCountAggregateOutputType> | number
+        }
+      }
+    }
     DefaultLevel: {
       payload: Prisma.$DefaultLevelPayload<ExtArgs>
       fields: Prisma.DefaultLevelFieldRefs
@@ -702,6 +778,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Player: {
+      payload: Prisma.$PlayerPayload<ExtArgs>
+      fields: Prisma.PlayerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlayerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlayerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>
+        }
+        findFirst: {
+          args: Prisma.PlayerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlayerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>
+        }
+        findMany: {
+          args: Prisma.PlayerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>[]
+        }
+        create: {
+          args: Prisma.PlayerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>
+        }
+        createMany: {
+          args: Prisma.PlayerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlayerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>[]
+        }
+        delete: {
+          args: Prisma.PlayerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>
+        }
+        update: {
+          args: Prisma.PlayerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlayerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlayerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlayerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlayerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPayload>
+        }
+        aggregate: {
+          args: Prisma.PlayerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlayer>
+        }
+        groupBy: {
+          args: Prisma.PlayerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlayerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlayerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlayerCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -760,7 +910,7 @@ export const TourScalarFieldEnum = {
   id: 'id',
   title: 'title',
   desc: 'desc',
-  startTime: 'startTime',
+  startingStack: 'startingStack',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'
@@ -786,6 +936,21 @@ export const TourLevelScalarFieldEnum = {
 export type TourLevelScalarFieldEnum = (typeof TourLevelScalarFieldEnum)[keyof typeof TourLevelScalarFieldEnum]
 
 
+export const TourControlScalarFieldEnum = {
+  id: 'id',
+  currentLevel: 'currentLevel',
+  isPaused: 'isPaused',
+  pausedAtSecond: 'pausedAtSecond',
+  levelStartedAt: 'levelStartedAt',
+  entries: 'entries',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  tourId: 'tourId'
+} as const
+
+export type TourControlScalarFieldEnum = (typeof TourControlScalarFieldEnum)[keyof typeof TourControlScalarFieldEnum]
+
+
 export const DefaultLevelScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -803,12 +968,31 @@ export const DefaultLevelScalarFieldEnum = {
 export type DefaultLevelScalarFieldEnum = (typeof DefaultLevelScalarFieldEnum)[keyof typeof DefaultLevelScalarFieldEnum]
 
 
+export const PlayerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  avatar: 'avatar',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type PlayerScalarFieldEnum = (typeof PlayerScalarFieldEnum)[keyof typeof PlayerScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -825,6 +1009,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -886,6 +1079,27 @@ export type EnumLevelTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'LevelType[]'
  */
 export type ListEnumLevelTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LevelType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -1000,7 +1214,9 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   tour?: Prisma.TourOmit
   tourLevel?: Prisma.TourLevelOmit
+  tourControl?: Prisma.TourControlOmit
   defaultLevel?: Prisma.DefaultLevelOmit
+  player?: Prisma.PlayerOmit
 }
 
 /* Types for Logging */

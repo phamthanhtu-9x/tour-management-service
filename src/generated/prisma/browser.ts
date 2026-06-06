@@ -32,7 +32,17 @@ export type Tour = Prisma.TourModel
  */
 export type TourLevel = Prisma.TourLevelModel
 /**
+ * Model TourControl
+ * 
+ */
+export type TourControl = Prisma.TourControlModel
+/**
  * Model DefaultLevel
  * 
  */
 export type DefaultLevel = Prisma.DefaultLevelModel
+/**
+ * Model Player
+ * 
+ */
+export type Player = Prisma.PlayerModel

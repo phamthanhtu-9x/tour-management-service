@@ -30,6 +30,7 @@ model User {
 
   tours Tour[]
   defaultLevels DefaultLevel[]
+  players Player[]
 
   @@map("users")
 }
@@ -37,7 +38,7 @@ model Tour {
   id Int @id @default(autoincrement())
   title String
   desc      String?
-  startTime DateTime?
+  startingStack Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -46,6 +47,7 @@ model Tour {
   user User @relation(fields: [userId], references: [id])
 
   levels TourLevel[]
+  control TourControl?
 
   @@map("tours")
 }
@@ -72,6 +74,26 @@ model TourLevel {
   @@map("tour_levels")
 }
 
+model TourControl {
+  id Int @id @default(autoincrement())
+
+  currentLevel   Int       @default(1)
+  isPaused       Boolean   @default(true)
+  pausedAtSecond Int       @default(0)
+  levelStartedAt DateTime?
+
+  // Mảng các entry dạng { name: string; avatar?: string; isEliminated: boolean }
+  entries Json @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tourId Int  @unique
+  tour   Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@map("tour_controls")
+}
+
 model DefaultLevel {
   id Int @id @default(autoincrement())
 
@@ -92,4 +114,19 @@ model DefaultLevel {
 
   @@unique([userId, idx])
   @@map("default_levels")
+}
+
+model Player {
+  id Int @id @default(autoincrement())
+
+  name   String
+  avatar String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("players")
 }

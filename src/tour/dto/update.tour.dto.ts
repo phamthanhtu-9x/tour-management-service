@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
-  IsDateString,
+  IsInt,
   IsOptional,
   IsString,
   ValidateNested,
@@ -28,12 +28,12 @@ export class UpdateTourDto {
   desc?: string;
 
   @ApiPropertyOptional({
-    description: 'Thời gian bắt đầu của tour (ISO 8601)',
-    example: '2026-06-10T18:00:00.000Z',
+    description: 'Số chip khởi điểm của mỗi người chơi',
+    example: 20000,
   })
-  @IsDateString()
+  @IsInt()
   @IsOptional()
-  startTime?: string;
+  startingStack?: number;
 
   @ApiPropertyOptional({
     description:

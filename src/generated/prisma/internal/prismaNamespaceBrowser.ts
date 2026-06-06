@@ -53,7 +53,9 @@ export const ModelName = {
   User: 'User',
   Tour: 'Tour',
   TourLevel: 'TourLevel',
-  DefaultLevel: 'DefaultLevel'
+  TourControl: 'TourControl',
+  DefaultLevel: 'DefaultLevel',
+  Player: 'Player'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -91,7 +93,7 @@ export const TourScalarFieldEnum = {
   id: 'id',
   title: 'title',
   desc: 'desc',
-  startTime: 'startTime',
+  startingStack: 'startingStack',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'
@@ -117,6 +119,21 @@ export const TourLevelScalarFieldEnum = {
 export type TourLevelScalarFieldEnum = (typeof TourLevelScalarFieldEnum)[keyof typeof TourLevelScalarFieldEnum]
 
 
+export const TourControlScalarFieldEnum = {
+  id: 'id',
+  currentLevel: 'currentLevel',
+  isPaused: 'isPaused',
+  pausedAtSecond: 'pausedAtSecond',
+  levelStartedAt: 'levelStartedAt',
+  entries: 'entries',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  tourId: 'tourId'
+} as const
+
+export type TourControlScalarFieldEnum = (typeof TourControlScalarFieldEnum)[keyof typeof TourControlScalarFieldEnum]
+
+
 export const DefaultLevelScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -134,12 +151,31 @@ export const DefaultLevelScalarFieldEnum = {
 export type DefaultLevelScalarFieldEnum = (typeof DefaultLevelScalarFieldEnum)[keyof typeof DefaultLevelScalarFieldEnum]
 
 
+export const PlayerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  avatar: 'avatar',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type PlayerScalarFieldEnum = (typeof PlayerScalarFieldEnum)[keyof typeof PlayerScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -156,4 +192,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

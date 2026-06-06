@@ -249,6 +249,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   tours?: Prisma.TourListRelationFilter
   defaultLevels?: Prisma.DefaultLevelListRelationFilter
+  players?: Prisma.PlayerListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -263,6 +264,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   tours?: Prisma.TourOrderByRelationAggregateInput
   defaultLevels?: Prisma.DefaultLevelOrderByRelationAggregateInput
+  players?: Prisma.PlayerOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -280,6 +282,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   tours?: Prisma.TourListRelationFilter
   defaultLevels?: Prisma.DefaultLevelListRelationFilter
+  players?: Prisma.PlayerListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -325,6 +328,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   tours?: Prisma.TourCreateNestedManyWithoutUserInput
   defaultLevels?: Prisma.DefaultLevelCreateNestedManyWithoutUserInput
+  players?: Prisma.PlayerCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -339,6 +343,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   tours?: Prisma.TourUncheckedCreateNestedManyWithoutUserInput
   defaultLevels?: Prisma.DefaultLevelUncheckedCreateNestedManyWithoutUserInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -352,6 +357,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tours?: Prisma.TourUpdateManyWithoutUserNestedInput
   defaultLevels?: Prisma.DefaultLevelUpdateManyWithoutUserNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -366,6 +372,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tours?: Prisma.TourUncheckedUpdateManyWithoutUserNestedInput
   defaultLevels?: Prisma.DefaultLevelUncheckedUpdateManyWithoutUserNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -500,6 +507,20 @@ export type UserUpdateOneRequiredWithoutDefaultLevelsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDefaultLevelsInput, Prisma.UserUpdateWithoutDefaultLevelsInput>, Prisma.UserUncheckedUpdateWithoutDefaultLevelsInput>
 }
 
+export type UserCreateNestedOneWithoutPlayersInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPlayersInput, Prisma.UserUncheckedCreateWithoutPlayersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPlayersInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPlayersNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPlayersInput, Prisma.UserUncheckedCreateWithoutPlayersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPlayersInput
+  upsert?: Prisma.UserUpsertWithoutPlayersInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPlayersInput, Prisma.UserUpdateWithoutPlayersInput>, Prisma.UserUncheckedUpdateWithoutPlayersInput>
+}
+
 export type UserCreateWithoutToursInput = {
   email: string
   hashedPassword: string
@@ -510,6 +531,7 @@ export type UserCreateWithoutToursInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultLevels?: Prisma.DefaultLevelCreateNestedManyWithoutUserInput
+  players?: Prisma.PlayerCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutToursInput = {
@@ -523,6 +545,7 @@ export type UserUncheckedCreateWithoutToursInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultLevels?: Prisma.DefaultLevelUncheckedCreateNestedManyWithoutUserInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutToursInput = {
@@ -551,6 +574,7 @@ export type UserUpdateWithoutToursInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultLevels?: Prisma.DefaultLevelUpdateManyWithoutUserNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutToursInput = {
@@ -564,6 +588,7 @@ export type UserUncheckedUpdateWithoutToursInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultLevels?: Prisma.DefaultLevelUncheckedUpdateManyWithoutUserNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDefaultLevelsInput = {
@@ -576,6 +601,7 @@ export type UserCreateWithoutDefaultLevelsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tours?: Prisma.TourCreateNestedManyWithoutUserInput
+  players?: Prisma.PlayerCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDefaultLevelsInput = {
@@ -589,6 +615,7 @@ export type UserUncheckedCreateWithoutDefaultLevelsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tours?: Prisma.TourUncheckedCreateNestedManyWithoutUserInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDefaultLevelsInput = {
@@ -617,6 +644,7 @@ export type UserUpdateWithoutDefaultLevelsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tours?: Prisma.TourUpdateManyWithoutUserNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDefaultLevelsInput = {
@@ -630,6 +658,77 @@ export type UserUncheckedUpdateWithoutDefaultLevelsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tours?: Prisma.TourUncheckedUpdateManyWithoutUserNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPlayersInput = {
+  email: string
+  hashedPassword: string
+  firstName?: string | null
+  lastName?: string | null
+  displayName?: string | null
+  avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tours?: Prisma.TourCreateNestedManyWithoutUserInput
+  defaultLevels?: Prisma.DefaultLevelCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPlayersInput = {
+  id?: number
+  email: string
+  hashedPassword: string
+  firstName?: string | null
+  lastName?: string | null
+  displayName?: string | null
+  avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tours?: Prisma.TourUncheckedCreateNestedManyWithoutUserInput
+  defaultLevels?: Prisma.DefaultLevelUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPlayersInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPlayersInput, Prisma.UserUncheckedCreateWithoutPlayersInput>
+}
+
+export type UserUpsertWithoutPlayersInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPlayersInput, Prisma.UserUncheckedUpdateWithoutPlayersInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPlayersInput, Prisma.UserUncheckedCreateWithoutPlayersInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPlayersInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPlayersInput, Prisma.UserUncheckedUpdateWithoutPlayersInput>
+}
+
+export type UserUpdateWithoutPlayersInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  hashedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tours?: Prisma.TourUpdateManyWithoutUserNestedInput
+  defaultLevels?: Prisma.DefaultLevelUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPlayersInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  hashedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tours?: Prisma.TourUncheckedUpdateManyWithoutUserNestedInput
+  defaultLevels?: Prisma.DefaultLevelUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -640,11 +739,13 @@ export type UserUncheckedUpdateWithoutDefaultLevelsInput = {
 export type UserCountOutputType = {
   tours: number
   defaultLevels: number
+  players: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tours?: boolean | UserCountOutputTypeCountToursArgs
   defaultLevels?: boolean | UserCountOutputTypeCountDefaultLevelsArgs
+  players?: boolean | UserCountOutputTypeCountPlayersArgs
 }
 
 /**
@@ -671,6 +772,13 @@ export type UserCountOutputTypeCountDefaultLevelsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.DefaultLevelWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPlayersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlayerWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -684,6 +792,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   tours?: boolean | Prisma.User$toursArgs<ExtArgs>
   defaultLevels?: boolean | Prisma.User$defaultLevelsArgs<ExtArgs>
+  players?: boolean | Prisma.User$playersArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -727,6 +836,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tours?: boolean | Prisma.User$toursArgs<ExtArgs>
   defaultLevels?: boolean | Prisma.User$defaultLevelsArgs<ExtArgs>
+  players?: boolean | Prisma.User$playersArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -737,6 +847,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     tours: Prisma.$TourPayload<ExtArgs>[]
     defaultLevels: Prisma.$DefaultLevelPayload<ExtArgs>[]
+    players: Prisma.$PlayerPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1144,6 +1255,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tours<T extends Prisma.User$toursArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$toursArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TourPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   defaultLevels<T extends Prisma.User$defaultLevelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$defaultLevelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DefaultLevelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  players<T extends Prisma.User$playersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$playersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1620,6 +1732,30 @@ export type User$defaultLevelsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.DefaultLevelScalarFieldEnum | Prisma.DefaultLevelScalarFieldEnum[]
+}
+
+/**
+ * User.players
+ */
+export type User$playersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Player
+   */
+  select?: Prisma.PlayerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Player
+   */
+  omit?: Prisma.PlayerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlayerInclude<ExtArgs> | null
+  where?: Prisma.PlayerWhereInput
+  orderBy?: Prisma.PlayerOrderByWithRelationInput | Prisma.PlayerOrderByWithRelationInput[]
+  cursor?: Prisma.PlayerWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlayerScalarFieldEnum | Prisma.PlayerScalarFieldEnum[]
 }
 
 /**
