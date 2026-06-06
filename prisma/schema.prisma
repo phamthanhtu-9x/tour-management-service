@@ -12,6 +12,11 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum LevelType {
+  BLIND
+  BREAK
+}
 model User {
   id Int @id @default(autoincrement())
   email String @unique
@@ -37,5 +42,29 @@ model Tour {
   userId Int
   user User @relation(fields: [userId], references: [id])
 
+  levels TourLevel[]
+
   @@map("tours")
+}
+
+model TourLevel {
+  id Int @id @default(autoincrement())
+
+  name     String?
+  type     LevelType
+  idx      Int
+  duration Int
+
+  smallBlind Int?
+  bigBlind   Int?
+  ante       Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tourId Int
+  tour   Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, idx])
+  @@map("tour_levels")
 }

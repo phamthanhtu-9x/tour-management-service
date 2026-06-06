@@ -9,7 +9,9 @@
 * 🟢 You can import this file directly.
 */
 
+export const LevelType = {
+  BLIND: 'BLIND',
+  BREAK: 'BREAK'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type LevelType = (typeof LevelType)[keyof typeof LevelType]

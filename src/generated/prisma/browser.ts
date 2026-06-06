@@ -27,3 +27,8 @@ export type User = Prisma.UserModel
  * 
  */
 export type Tour = Prisma.TourModel
+/**
+ * Model TourLevel
+ * 
+ */
+export type TourLevel = Prisma.TourLevelModel

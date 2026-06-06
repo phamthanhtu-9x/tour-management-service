@@ -385,7 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
-  Tour: 'Tour'
+  Tour: 'Tour',
+  TourLevel: 'TourLevel'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -401,7 +402,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tour"
+    modelProps: "user" | "tour" | "tourLevel"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -553,6 +554,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TourLevel: {
+      payload: Prisma.$TourLevelPayload<ExtArgs>
+      fields: Prisma.TourLevelFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TourLevelFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TourLevelFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>
+        }
+        findFirst: {
+          args: Prisma.TourLevelFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TourLevelFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>
+        }
+        findMany: {
+          args: Prisma.TourLevelFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>[]
+        }
+        create: {
+          args: Prisma.TourLevelCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>
+        }
+        createMany: {
+          args: Prisma.TourLevelCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TourLevelCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>[]
+        }
+        delete: {
+          args: Prisma.TourLevelDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>
+        }
+        update: {
+          args: Prisma.TourLevelUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>
+        }
+        deleteMany: {
+          args: Prisma.TourLevelDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TourLevelUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TourLevelUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>[]
+        }
+        upsert: {
+          args: Prisma.TourLevelUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TourLevelPayload>
+        }
+        aggregate: {
+          args: Prisma.TourLevelAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTourLevel>
+        }
+        groupBy: {
+          args: Prisma.TourLevelGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TourLevelGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TourLevelCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TourLevelCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -616,6 +691,23 @@ export const TourScalarFieldEnum = {
 } as const
 
 export type TourScalarFieldEnum = (typeof TourScalarFieldEnum)[keyof typeof TourScalarFieldEnum]
+
+
+export const TourLevelScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  idx: 'idx',
+  duration: 'duration',
+  smallBlind: 'smallBlind',
+  bigBlind: 'bigBlind',
+  ante: 'ante',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  tourId: 'tourId'
+} as const
+
+export type TourLevelScalarFieldEnum = (typeof TourLevelScalarFieldEnum)[keyof typeof TourLevelScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -687,6 +779,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LevelType'
+ */
+export type EnumLevelTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LevelType'>
+    
+
+
+/**
+ * Reference to a field of type 'LevelType[]'
+ */
+export type ListEnumLevelTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LevelType[]'>
     
 
 
@@ -800,6 +906,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   tour?: Prisma.TourOmit
+  tourLevel?: Prisma.TourLevelOmit
 }
 
 /* Types for Logging */

@@ -52,7 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Tour: 'Tour'
+  Tour: 'Tour',
+  TourLevel: 'TourLevel'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -95,6 +96,23 @@ export const TourScalarFieldEnum = {
 } as const
 
 export type TourScalarFieldEnum = (typeof TourScalarFieldEnum)[keyof typeof TourScalarFieldEnum]
+
+
+export const TourLevelScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  idx: 'idx',
+  duration: 'duration',
+  smallBlind: 'smallBlind',
+  bigBlind: 'bigBlind',
+  ante: 'ante',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  tourId: 'tourId'
+} as const
+
+export type TourLevelScalarFieldEnum = (typeof TourLevelScalarFieldEnum)[keyof typeof TourLevelScalarFieldEnum]
 
 
 export const SortOrder = {

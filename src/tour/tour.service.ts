@@ -3,6 +3,7 @@ import { InsertTourDto, UpdateTourDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import { PaginatedResource } from 'src/common/interfaces/paginated-res.interface';
+import { DEFAULT_TOUR_LEVELS } from './tour.constants';
 
 @Injectable()
 export class TourService {
@@ -60,6 +61,16 @@ export class TourService {
       data: {
         ...insertTourDto,
         userId,
+        levels: {
+          create: DEFAULT_TOUR_LEVELS,
+        },
+      },
+      include: {
+        levels: {
+          orderBy: {
+            idx: 'asc',
+          },
+        },
       },
     });
 
