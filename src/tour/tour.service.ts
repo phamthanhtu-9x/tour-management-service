@@ -57,12 +57,31 @@ export class TourService {
   }
 
   async insertTour(userId: number, insertTourDto: InsertTourDto) {
+    // Lấy cấu hình level mặc định của user; nếu chưa có thì dùng bộ mặc định sẵn
+    const userDefaultLevels = await this.prismaService.defaultLevel.findMany({
+      where: { userId },
+      orderBy: { idx: 'asc' },
+    });
+
+    const levels =
+      userDefaultLevels.length > 0
+        ? userDefaultLevels.map((level) => ({
+            name: level.name,
+            type: level.type,
+            idx: level.idx,
+            duration: level.duration,
+            smallBlind: level.smallBlind,
+            bigBlind: level.bigBlind,
+            ante: level.ante,
+          }))
+        : DEFAULT_TOUR_LEVELS;
+
     const tour = await this.prismaService.tour.create({
       data: {
         ...insertTourDto,
         userId,
         levels: {
-          create: DEFAULT_TOUR_LEVELS,
+          create: levels,
         },
       },
       include: {
@@ -92,12 +111,30 @@ export class TourService {
       throw new ForbiddenException('Tour not found to update');
     }
 
-    return await this.prismaService.tour.update({
+    const { levels, ...rest } = updateTourDto;
+
+    return this.prismaService.tour.update({
       where: {
         id: tourId,
       },
       data: {
-        ...updateTourDto,
+        ...rest,
+        // Nếu có gửi levels thì thay thế toàn bộ level hiện tại của tour
+        ...(levels
+          ? {
+              levels: {
+                deleteMany: {},
+                create: levels,
+              },
+            }
+          : {}),
+      },
+      include: {
+        levels: {
+          orderBy: {
+            idx: 'asc',
+          },
+        },
       },
     });
   }

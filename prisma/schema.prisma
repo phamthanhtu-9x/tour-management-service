@@ -29,12 +29,15 @@ model User {
   updatedAt DateTime @updatedAt
 
   tours Tour[]
+  defaultLevels DefaultLevel[]
 
   @@map("users")
 }
 model Tour {
   id Int @id @default(autoincrement())
   title String
+  desc      String?
+  startTime DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -67,4 +70,26 @@ model TourLevel {
 
   @@unique([tourId, idx])
   @@map("tour_levels")
+}
+
+model DefaultLevel {
+  id Int @id @default(autoincrement())
+
+  name     String?
+  type     LevelType
+  idx      Int
+  duration Int
+
+  smallBlind Int?
+  bigBlind   Int?
+  ante       Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, idx])
+  @@map("default_levels")
 }
