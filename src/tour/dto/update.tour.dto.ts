@@ -36,6 +36,14 @@ export class UpdateTourDto {
   startingStack?: number;
 
   @ApiPropertyOptional({
+    description: 'Idx của level mà thời gian đăng ký (re-entry) kết thúc',
+    example: 6,
+  })
+  @IsInt()
+  @IsOptional()
+  regEnd?: number;
+
+  @ApiPropertyOptional({
     description:
       'Danh sách level của tour (nếu có, sẽ thay thế toàn bộ level hiện tại)',
     type: [TourLevelItemDto],

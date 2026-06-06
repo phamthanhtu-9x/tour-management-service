@@ -39,6 +39,7 @@ model Tour {
   title String
   desc      String?
   startingStack Int?
+  regEnd    Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
