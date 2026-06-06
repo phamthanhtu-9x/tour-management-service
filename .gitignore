@@ -13,3 +13,6 @@ coverage
 *.swo
 .claude
 CLAUDE.md
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
