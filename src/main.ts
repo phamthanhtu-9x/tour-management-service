@@ -1,4 +1,6 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -7,7 +9,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Loại bỏ trường thừa không định nghĩa trong DTO
@@ -17,6 +19,12 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
+
+  // Phục vụ file tĩnh trong thư mục uploads qua prefix /uploads
+  // Dùng cwd để khớp đúng nơi multer ghi file (./uploads tính theo cwd)
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads',
+  });
 
   // --- SWAGGER CONFIG ---
   const config = new DocumentBuilder()
@@ -29,7 +37,12 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // --- SECURITY MIDDLEWARE ---
-  app.use(helmet());
+  app.use(
+    helmet({
+      // Cho phép origin khác (vd frontend) nhúng ảnh từ /uploads
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.enableCors();
 
   await app.listen(process.env.PORT ?? 3002);
