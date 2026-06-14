@@ -1,7 +1,9 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import {
   InsertTourDto,
@@ -13,10 +15,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import { PaginatedResource } from 'src/common/interfaces/paginated-res.interface';
 import { DEFAULT_TOUR_LEVELS } from './tour.constants';
+import { TourGateway } from './tour.gateway';
 
 @Injectable()
 export class TourService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    @Inject(forwardRef(() => TourGateway))
+    private tourGateway: TourGateway,
+  ) {}
   async getTours(
     userId: number,
     query: PaginationQueryDto,
@@ -84,8 +91,14 @@ export class TourService {
   }
 
   async getTourControl(userId: number, tourId: number) {
-    const { control } = await this.getOwnedControl(userId, tourId);
-    return { ...control, entries: control.entries ?? [] };
+    const { control, totalLevels } = await this.getOwnedControl(userId, tourId);
+    const elapsed = this.elapsedSeconds(control);
+    return {
+      ...control,
+      entries: control.entries ?? [],
+      elapsedSeconds: elapsed,
+      totalLevels,
+    };
   }
 
   async insertTour(userId: number, insertTourDto: InsertTourDto) {
@@ -253,11 +266,13 @@ export class TourService {
 
   async startClock(userId: number, tourId: number) {
     const { control } = await this.getOwnedControl(userId, tourId);
-    return this.updateControl(control.id, {
+    const result = await this.updateControl(control.id, {
       isPaused: false,
       pausedAtSecond: 0,
       levelStartedAt: new Date(),
     });
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 
   async pauseClock(userId: number, tourId: number) {
@@ -265,11 +280,13 @@ export class TourService {
     if (control.isPaused) {
       return control;
     }
-    return this.updateControl(control.id, {
+    const result = await this.updateControl(control.id, {
       isPaused: true,
       pausedAtSecond: this.elapsedSeconds(control),
       levelStartedAt: null,
     });
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 
   async resumeClock(userId: number, tourId: number) {
@@ -277,10 +294,12 @@ export class TourService {
     if (!control.isPaused) {
       return control;
     }
-    return this.updateControl(control.id, {
+    const result = await this.updateControl(control.id, {
       isPaused: false,
       levelStartedAt: new Date(),
     });
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 
   async nextLevel(userId: number, tourId: number) {
@@ -288,7 +307,9 @@ export class TourService {
     if (control.currentLevel >= totalLevels) {
       throw new ForbiddenException('Đã ở level cuối cùng');
     }
-    return this.goToLevel(control, control.currentLevel + 1);
+    const result = await this.goToLevel(control, control.currentLevel + 1);
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 
   async prevLevel(userId: number, tourId: number) {
@@ -296,7 +317,9 @@ export class TourService {
     if (control.currentLevel <= 1) {
       throw new ForbiddenException('Đã ở level đầu tiên');
     }
-    return this.goToLevel(control, control.currentLevel - 1);
+    const result = await this.goToLevel(control, control.currentLevel - 1);
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 
   async setLevel(userId: number, tourId: number, dto: SetLevelDto) {
@@ -306,7 +329,9 @@ export class TourService {
         `Level không hợp lệ (tour chỉ có ${totalLevels} level)`,
       );
     }
-    return this.goToLevel(control, dto.level);
+    const result = await this.goToLevel(control, dto.level);
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 
   /** Nhảy tới level mới: reset thời gian, giữ nguyên trạng thái pause hiện tại. */
@@ -323,7 +348,7 @@ export class TourService {
 
   async resetClock(userId: number, tourId: number) {
     const { control } = await this.getOwnedControl(userId, tourId);
-    return this.prismaService.tourControl.update({
+    const result = await this.prismaService.tourControl.update({
       where: { id: control.id },
       data: {
         currentLevel: 1,
@@ -333,6 +358,8 @@ export class TourService {
         entries: [],
       },
     });
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 
   async updateEntries(
@@ -346,9 +373,11 @@ export class TourService {
       ...(entry.avatar !== undefined ? { avatar: entry.avatar } : {}),
       isEliminated: entry.isEliminated ?? false,
     }));
-    return this.prismaService.tourControl.update({
+    const result = await this.prismaService.tourControl.update({
       where: { id: control.id },
       data: { entries: normalized },
     });
+    await this.tourGateway.broadcastTourState(tourId);
+    return result;
   }
 }
