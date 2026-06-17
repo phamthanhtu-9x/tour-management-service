@@ -3,12 +3,13 @@ jest.mock('../prisma/prisma.service', () => ({
   PrismaService: jest.fn().mockImplementation(() => ({
     tour: { findUnique: jest.fn() },
     tourControl: { findUnique: jest.fn() },
-    tourLevel: { count: jest.fn() },
+    tourLevel: { count: jest.fn(), findMany: jest.fn() },
   })),
 }));
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { Socket, Server } from 'socket.io';
 import { TourGateway } from './tour.gateway';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,11 +18,15 @@ import { PrismaService } from '../prisma/prisma.service';
 const mockPrismaService = {
   tour: { findUnique: jest.fn() },
   tourControl: { findUnique: jest.fn() },
-  tourLevel: { count: jest.fn() },
+  tourLevel: { count: jest.fn(), findMany: jest.fn() },
 };
 
 const mockJwtService = {
   verify: jest.fn(),
+};
+
+const mockConfigService = {
+  get: jest.fn().mockReturnValue('test-jwt-secret'),
 };
 
 describe('TourGateway', () => {
@@ -52,6 +57,7 @@ describe('TourGateway', () => {
         TourGateway,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -67,7 +73,9 @@ describe('TourGateway', () => {
 
       await gateway.handleConnection(mockSocket);
 
-      expect(mockJwtService.verify).toHaveBeenCalledWith('valid-jwt-token');
+      expect(mockJwtService.verify).toHaveBeenCalledWith('valid-jwt-token', {
+        secret: 'test-jwt-secret',
+      });
       expect(mockSocket.data.userId).toBe(1);
       expect(mockSocket.data.email).toBe('test@test.com');
       expect(mockSocket.disconnect).not.toHaveBeenCalled();
@@ -222,6 +230,68 @@ describe('TourGateway', () => {
       const state = await gateway.computeTourState(1, 7);
 
       expect(state.elapsedSeconds).toBeGreaterThanOrEqual(5);
+    });
+  });
+
+  describe('broadcastTourLevels', () => {
+    it('nên broadcast danh sách level tới room', async () => {
+      const mockLevels = [
+        {
+          id: 10,
+          name: 'Level 1',
+          type: 'BLIND',
+          idx: 1,
+          duration: 20,
+          smallBlind: 100,
+          bigBlind: 200,
+          ante: 100,
+        },
+        {
+          id: 11,
+          name: 'Break',
+          type: 'BREAK',
+          idx: 2,
+          duration: 10,
+          smallBlind: null,
+          bigBlind: null,
+          ante: null,
+        },
+      ];
+      mockPrismaService.tourLevel.findMany.mockResolvedValue(mockLevels);
+
+      await gateway.broadcastTourLevels(1);
+
+      expect(mockPrismaService.tourLevel.findMany).toHaveBeenCalledWith({
+        where: { tourId: 1 },
+        orderBy: { idx: 'asc' },
+      });
+      expect(mockServer.to).toHaveBeenCalledWith('tour:1');
+      const roomEmit = (mockServer.to as jest.Mock).mock.results[0].value.emit;
+      expect(roomEmit).toHaveBeenCalledWith('tour-levels', {
+        tourId: 1,
+        levels: [
+          {
+            id: 10,
+            name: 'Level 1',
+            type: 'BLIND',
+            idx: 1,
+            duration: 20,
+            smallBlind: 100,
+            bigBlind: 200,
+            ante: 100,
+          },
+          {
+            id: 11,
+            name: 'Break',
+            type: 'BREAK',
+            idx: 2,
+            duration: 10,
+            smallBlind: null,
+            bigBlind: null,
+            ante: null,
+          },
+        ],
+      });
     });
   });
 });

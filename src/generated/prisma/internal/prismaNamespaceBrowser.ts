@@ -94,6 +94,7 @@ export const TourScalarFieldEnum = {
   title: 'title',
   desc: 'desc',
   startingStack: 'startingStack',
+  regEnd: 'regEnd',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'
@@ -123,9 +124,11 @@ export const TourControlScalarFieldEnum = {
   id: 'id',
   currentLevel: 'currentLevel',
   isPaused: 'isPaused',
+  isRunning: 'isRunning',
   pausedAtSecond: 'pausedAtSecond',
   levelStartedAt: 'levelStartedAt',
   entries: 'entries',
+  gtd: 'gtd',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   tourId: 'tourId'

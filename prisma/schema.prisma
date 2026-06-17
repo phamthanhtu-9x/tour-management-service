@@ -80,11 +80,15 @@ model TourControl {
 
   currentLevel   Int       @default(1)
   isPaused       Boolean   @default(true)
+  isRunning      Boolean   @default(false)
   pausedAtSecond Int       @default(0)
   levelStartedAt DateTime?
 
   // Mảng các entry dạng { name: string; avatar?: string; isEliminated: boolean }
   entries Json @default("[]")
+
+  // Chuỗi giải thưởng GTD dạng '10/5/3/3/1/..'
+  gtd String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

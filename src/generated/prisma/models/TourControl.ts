@@ -43,8 +43,10 @@ export type TourControlMinAggregateOutputType = {
   id: number | null
   currentLevel: number | null
   isPaused: boolean | null
+  isRunning: boolean | null
   pausedAtSecond: number | null
   levelStartedAt: Date | null
+  gtd: string | null
   createdAt: Date | null
   updatedAt: Date | null
   tourId: number | null
@@ -54,8 +56,10 @@ export type TourControlMaxAggregateOutputType = {
   id: number | null
   currentLevel: number | null
   isPaused: boolean | null
+  isRunning: boolean | null
   pausedAtSecond: number | null
   levelStartedAt: Date | null
+  gtd: string | null
   createdAt: Date | null
   updatedAt: Date | null
   tourId: number | null
@@ -65,9 +69,11 @@ export type TourControlCountAggregateOutputType = {
   id: number
   currentLevel: number
   isPaused: number
+  isRunning: number
   pausedAtSecond: number
   levelStartedAt: number
   entries: number
+  gtd: number
   createdAt: number
   updatedAt: number
   tourId: number
@@ -93,8 +99,10 @@ export type TourControlMinAggregateInputType = {
   id?: true
   currentLevel?: true
   isPaused?: true
+  isRunning?: true
   pausedAtSecond?: true
   levelStartedAt?: true
+  gtd?: true
   createdAt?: true
   updatedAt?: true
   tourId?: true
@@ -104,8 +112,10 @@ export type TourControlMaxAggregateInputType = {
   id?: true
   currentLevel?: true
   isPaused?: true
+  isRunning?: true
   pausedAtSecond?: true
   levelStartedAt?: true
+  gtd?: true
   createdAt?: true
   updatedAt?: true
   tourId?: true
@@ -115,9 +125,11 @@ export type TourControlCountAggregateInputType = {
   id?: true
   currentLevel?: true
   isPaused?: true
+  isRunning?: true
   pausedAtSecond?: true
   levelStartedAt?: true
   entries?: true
+  gtd?: true
   createdAt?: true
   updatedAt?: true
   tourId?: true
@@ -214,9 +226,11 @@ export type TourControlGroupByOutputType = {
   id: number
   currentLevel: number
   isPaused: boolean
+  isRunning: boolean
   pausedAtSecond: number
   levelStartedAt: Date | null
   entries: runtime.JsonValue
+  gtd: string | null
   createdAt: Date
   updatedAt: Date
   tourId: number
@@ -249,9 +263,11 @@ export type TourControlWhereInput = {
   id?: Prisma.IntFilter<"TourControl"> | number
   currentLevel?: Prisma.IntFilter<"TourControl"> | number
   isPaused?: Prisma.BoolFilter<"TourControl"> | boolean
+  isRunning?: Prisma.BoolFilter<"TourControl"> | boolean
   pausedAtSecond?: Prisma.IntFilter<"TourControl"> | number
   levelStartedAt?: Prisma.DateTimeNullableFilter<"TourControl"> | Date | string | null
   entries?: Prisma.JsonFilter<"TourControl">
+  gtd?: Prisma.StringNullableFilter<"TourControl"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TourControl"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TourControl"> | Date | string
   tourId?: Prisma.IntFilter<"TourControl"> | number
@@ -262,9 +278,11 @@ export type TourControlOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   currentLevel?: Prisma.SortOrder
   isPaused?: Prisma.SortOrder
+  isRunning?: Prisma.SortOrder
   pausedAtSecond?: Prisma.SortOrder
   levelStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   entries?: Prisma.SortOrder
+  gtd?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tourId?: Prisma.SortOrder
@@ -279,9 +297,11 @@ export type TourControlWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TourControlWhereInput | Prisma.TourControlWhereInput[]
   currentLevel?: Prisma.IntFilter<"TourControl"> | number
   isPaused?: Prisma.BoolFilter<"TourControl"> | boolean
+  isRunning?: Prisma.BoolFilter<"TourControl"> | boolean
   pausedAtSecond?: Prisma.IntFilter<"TourControl"> | number
   levelStartedAt?: Prisma.DateTimeNullableFilter<"TourControl"> | Date | string | null
   entries?: Prisma.JsonFilter<"TourControl">
+  gtd?: Prisma.StringNullableFilter<"TourControl"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TourControl"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TourControl"> | Date | string
   tour?: Prisma.XOR<Prisma.TourScalarRelationFilter, Prisma.TourWhereInput>
@@ -291,9 +311,11 @@ export type TourControlOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   currentLevel?: Prisma.SortOrder
   isPaused?: Prisma.SortOrder
+  isRunning?: Prisma.SortOrder
   pausedAtSecond?: Prisma.SortOrder
   levelStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   entries?: Prisma.SortOrder
+  gtd?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tourId?: Prisma.SortOrder
@@ -311,9 +333,11 @@ export type TourControlScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"TourControl"> | number
   currentLevel?: Prisma.IntWithAggregatesFilter<"TourControl"> | number
   isPaused?: Prisma.BoolWithAggregatesFilter<"TourControl"> | boolean
+  isRunning?: Prisma.BoolWithAggregatesFilter<"TourControl"> | boolean
   pausedAtSecond?: Prisma.IntWithAggregatesFilter<"TourControl"> | number
   levelStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TourControl"> | Date | string | null
   entries?: Prisma.JsonWithAggregatesFilter<"TourControl">
+  gtd?: Prisma.StringNullableWithAggregatesFilter<"TourControl"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TourControl"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TourControl"> | Date | string
   tourId?: Prisma.IntWithAggregatesFilter<"TourControl"> | number
@@ -322,9 +346,11 @@ export type TourControlScalarWhereWithAggregatesInput = {
 export type TourControlCreateInput = {
   currentLevel?: number
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: number
   levelStartedAt?: Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tour: Prisma.TourCreateNestedOneWithoutControlInput
@@ -334,9 +360,11 @@ export type TourControlUncheckedCreateInput = {
   id?: number
   currentLevel?: number
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: number
   levelStartedAt?: Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tourId: number
@@ -345,9 +373,11 @@ export type TourControlUncheckedCreateInput = {
 export type TourControlUpdateInput = {
   currentLevel?: Prisma.IntFieldUpdateOperationsInput | number
   isPaused?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRunning?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pausedAtSecond?: Prisma.IntFieldUpdateOperationsInput | number
   levelStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tour?: Prisma.TourUpdateOneRequiredWithoutControlNestedInput
@@ -357,9 +387,11 @@ export type TourControlUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   currentLevel?: Prisma.IntFieldUpdateOperationsInput | number
   isPaused?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRunning?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pausedAtSecond?: Prisma.IntFieldUpdateOperationsInput | number
   levelStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tourId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -369,9 +401,11 @@ export type TourControlCreateManyInput = {
   id?: number
   currentLevel?: number
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: number
   levelStartedAt?: Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tourId: number
@@ -380,9 +414,11 @@ export type TourControlCreateManyInput = {
 export type TourControlUpdateManyMutationInput = {
   currentLevel?: Prisma.IntFieldUpdateOperationsInput | number
   isPaused?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRunning?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pausedAtSecond?: Prisma.IntFieldUpdateOperationsInput | number
   levelStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -391,9 +427,11 @@ export type TourControlUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   currentLevel?: Prisma.IntFieldUpdateOperationsInput | number
   isPaused?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRunning?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pausedAtSecond?: Prisma.IntFieldUpdateOperationsInput | number
   levelStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tourId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -408,9 +446,11 @@ export type TourControlCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   currentLevel?: Prisma.SortOrder
   isPaused?: Prisma.SortOrder
+  isRunning?: Prisma.SortOrder
   pausedAtSecond?: Prisma.SortOrder
   levelStartedAt?: Prisma.SortOrder
   entries?: Prisma.SortOrder
+  gtd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tourId?: Prisma.SortOrder
@@ -427,8 +467,10 @@ export type TourControlMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   currentLevel?: Prisma.SortOrder
   isPaused?: Prisma.SortOrder
+  isRunning?: Prisma.SortOrder
   pausedAtSecond?: Prisma.SortOrder
   levelStartedAt?: Prisma.SortOrder
+  gtd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tourId?: Prisma.SortOrder
@@ -438,8 +480,10 @@ export type TourControlMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   currentLevel?: Prisma.SortOrder
   isPaused?: Prisma.SortOrder
+  isRunning?: Prisma.SortOrder
   pausedAtSecond?: Prisma.SortOrder
   levelStartedAt?: Prisma.SortOrder
+  gtd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tourId?: Prisma.SortOrder
@@ -495,9 +539,11 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 export type TourControlCreateWithoutTourInput = {
   currentLevel?: number
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: number
   levelStartedAt?: Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -506,9 +552,11 @@ export type TourControlUncheckedCreateWithoutTourInput = {
   id?: number
   currentLevel?: number
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: number
   levelStartedAt?: Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -532,9 +580,11 @@ export type TourControlUpdateToOneWithWhereWithoutTourInput = {
 export type TourControlUpdateWithoutTourInput = {
   currentLevel?: Prisma.IntFieldUpdateOperationsInput | number
   isPaused?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRunning?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pausedAtSecond?: Prisma.IntFieldUpdateOperationsInput | number
   levelStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -543,9 +593,11 @@ export type TourControlUncheckedUpdateWithoutTourInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   currentLevel?: Prisma.IntFieldUpdateOperationsInput | number
   isPaused?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRunning?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pausedAtSecond?: Prisma.IntFieldUpdateOperationsInput | number
   levelStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   entries?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gtd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -556,9 +608,11 @@ export type TourControlSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   currentLevel?: boolean
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: boolean
   levelStartedAt?: boolean
   entries?: boolean
+  gtd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tourId?: boolean
@@ -569,9 +623,11 @@ export type TourControlSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   currentLevel?: boolean
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: boolean
   levelStartedAt?: boolean
   entries?: boolean
+  gtd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tourId?: boolean
@@ -582,9 +638,11 @@ export type TourControlSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   currentLevel?: boolean
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: boolean
   levelStartedAt?: boolean
   entries?: boolean
+  gtd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tourId?: boolean
@@ -595,15 +653,17 @@ export type TourControlSelectScalar = {
   id?: boolean
   currentLevel?: boolean
   isPaused?: boolean
+  isRunning?: boolean
   pausedAtSecond?: boolean
   levelStartedAt?: boolean
   entries?: boolean
+  gtd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tourId?: boolean
 }
 
-export type TourControlOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "currentLevel" | "isPaused" | "pausedAtSecond" | "levelStartedAt" | "entries" | "createdAt" | "updatedAt" | "tourId", ExtArgs["result"]["tourControl"]>
+export type TourControlOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "currentLevel" | "isPaused" | "isRunning" | "pausedAtSecond" | "levelStartedAt" | "entries" | "gtd" | "createdAt" | "updatedAt" | "tourId", ExtArgs["result"]["tourControl"]>
 export type TourControlInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tour?: boolean | Prisma.TourDefaultArgs<ExtArgs>
 }
@@ -623,9 +683,11 @@ export type $TourControlPayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: number
     currentLevel: number
     isPaused: boolean
+    isRunning: boolean
     pausedAtSecond: number
     levelStartedAt: Date | null
     entries: runtime.JsonValue
+    gtd: string | null
     createdAt: Date
     updatedAt: Date
     tourId: number
@@ -1056,9 +1118,11 @@ export interface TourControlFieldRefs {
   readonly id: Prisma.FieldRef<"TourControl", 'Int'>
   readonly currentLevel: Prisma.FieldRef<"TourControl", 'Int'>
   readonly isPaused: Prisma.FieldRef<"TourControl", 'Boolean'>
+  readonly isRunning: Prisma.FieldRef<"TourControl", 'Boolean'>
   readonly pausedAtSecond: Prisma.FieldRef<"TourControl", 'Int'>
   readonly levelStartedAt: Prisma.FieldRef<"TourControl", 'DateTime'>
   readonly entries: Prisma.FieldRef<"TourControl", 'Json'>
+  readonly gtd: Prisma.FieldRef<"TourControl", 'String'>
   readonly createdAt: Prisma.FieldRef<"TourControl", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TourControl", 'DateTime'>
   readonly tourId: Prisma.FieldRef<"TourControl", 'Int'>

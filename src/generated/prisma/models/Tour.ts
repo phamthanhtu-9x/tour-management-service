@@ -28,12 +28,14 @@ export type AggregateTour = {
 export type TourAvgAggregateOutputType = {
   id: number | null
   startingStack: number | null
+  regEnd: number | null
   userId: number | null
 }
 
 export type TourSumAggregateOutputType = {
   id: number | null
   startingStack: number | null
+  regEnd: number | null
   userId: number | null
 }
 
@@ -42,6 +44,7 @@ export type TourMinAggregateOutputType = {
   title: string | null
   desc: string | null
   startingStack: number | null
+  regEnd: number | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: number | null
@@ -52,6 +55,7 @@ export type TourMaxAggregateOutputType = {
   title: string | null
   desc: string | null
   startingStack: number | null
+  regEnd: number | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: number | null
@@ -62,6 +66,7 @@ export type TourCountAggregateOutputType = {
   title: number
   desc: number
   startingStack: number
+  regEnd: number
   createdAt: number
   updatedAt: number
   userId: number
@@ -72,12 +77,14 @@ export type TourCountAggregateOutputType = {
 export type TourAvgAggregateInputType = {
   id?: true
   startingStack?: true
+  regEnd?: true
   userId?: true
 }
 
 export type TourSumAggregateInputType = {
   id?: true
   startingStack?: true
+  regEnd?: true
   userId?: true
 }
 
@@ -86,6 +93,7 @@ export type TourMinAggregateInputType = {
   title?: true
   desc?: true
   startingStack?: true
+  regEnd?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -96,6 +104,7 @@ export type TourMaxAggregateInputType = {
   title?: true
   desc?: true
   startingStack?: true
+  regEnd?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -106,6 +115,7 @@ export type TourCountAggregateInputType = {
   title?: true
   desc?: true
   startingStack?: true
+  regEnd?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -203,6 +213,7 @@ export type TourGroupByOutputType = {
   title: string
   desc: string | null
   startingStack: number | null
+  regEnd: number | null
   createdAt: Date
   updatedAt: Date
   userId: number
@@ -236,6 +247,7 @@ export type TourWhereInput = {
   title?: Prisma.StringFilter<"Tour"> | string
   desc?: Prisma.StringNullableFilter<"Tour"> | string | null
   startingStack?: Prisma.IntNullableFilter<"Tour"> | number | null
+  regEnd?: Prisma.IntNullableFilter<"Tour"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Tour"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tour"> | Date | string
   userId?: Prisma.IntFilter<"Tour"> | number
@@ -249,6 +261,7 @@ export type TourOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   desc?: Prisma.SortOrderInput | Prisma.SortOrder
   startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
+  regEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -265,6 +278,7 @@ export type TourWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Tour"> | string
   desc?: Prisma.StringNullableFilter<"Tour"> | string | null
   startingStack?: Prisma.IntNullableFilter<"Tour"> | number | null
+  regEnd?: Prisma.IntNullableFilter<"Tour"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Tour"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tour"> | Date | string
   userId?: Prisma.IntFilter<"Tour"> | number
@@ -278,6 +292,7 @@ export type TourOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   desc?: Prisma.SortOrderInput | Prisma.SortOrder
   startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
+  regEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -296,6 +311,7 @@ export type TourScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Tour"> | string
   desc?: Prisma.StringNullableWithAggregatesFilter<"Tour"> | string | null
   startingStack?: Prisma.IntNullableWithAggregatesFilter<"Tour"> | number | null
+  regEnd?: Prisma.IntNullableWithAggregatesFilter<"Tour"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tour"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tour"> | Date | string
   userId?: Prisma.IntWithAggregatesFilter<"Tour"> | number
@@ -305,6 +321,7 @@ export type TourCreateInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutToursInput
@@ -317,6 +334,7 @@ export type TourUncheckedCreateInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: number
@@ -328,6 +346,7 @@ export type TourUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutToursNestedInput
@@ -340,6 +359,7 @@ export type TourUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -352,6 +372,7 @@ export type TourCreateManyInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: number
@@ -361,6 +382,7 @@ export type TourUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -370,6 +392,7 @@ export type TourUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -390,6 +413,7 @@ export type TourCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   desc?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
+  regEnd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -398,6 +422,7 @@ export type TourCountOrderByAggregateInput = {
 export type TourAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
+  regEnd?: Prisma.SortOrder
   userId?: Prisma.SortOrder
 }
 
@@ -406,6 +431,7 @@ export type TourMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   desc?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
+  regEnd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -416,6 +442,7 @@ export type TourMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   desc?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
+  regEnd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -424,6 +451,7 @@ export type TourMinOrderByAggregateInput = {
 export type TourSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
+  regEnd?: Prisma.SortOrder
   userId?: Prisma.SortOrder
 }
 
@@ -514,6 +542,7 @@ export type TourCreateWithoutUserInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   levels?: Prisma.TourLevelCreateNestedManyWithoutTourInput
@@ -525,6 +554,7 @@ export type TourUncheckedCreateWithoutUserInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   levels?: Prisma.TourLevelUncheckedCreateNestedManyWithoutTourInput
@@ -565,6 +595,7 @@ export type TourScalarWhereInput = {
   title?: Prisma.StringFilter<"Tour"> | string
   desc?: Prisma.StringNullableFilter<"Tour"> | string | null
   startingStack?: Prisma.IntNullableFilter<"Tour"> | number | null
+  regEnd?: Prisma.IntNullableFilter<"Tour"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Tour"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tour"> | Date | string
   userId?: Prisma.IntFilter<"Tour"> | number
@@ -574,6 +605,7 @@ export type TourCreateWithoutLevelsInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutToursInput
@@ -585,6 +617,7 @@ export type TourUncheckedCreateWithoutLevelsInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: number
@@ -611,6 +644,7 @@ export type TourUpdateWithoutLevelsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutToursNestedInput
@@ -622,6 +656,7 @@ export type TourUncheckedUpdateWithoutLevelsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -632,6 +667,7 @@ export type TourCreateWithoutControlInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutToursInput
@@ -643,6 +679,7 @@ export type TourUncheckedCreateWithoutControlInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: number
@@ -669,6 +706,7 @@ export type TourUpdateWithoutControlInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutToursNestedInput
@@ -680,6 +718,7 @@ export type TourUncheckedUpdateWithoutControlInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -691,6 +730,7 @@ export type TourCreateManyUserInput = {
   title: string
   desc?: string | null
   startingStack?: number | null
+  regEnd?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -699,6 +739,7 @@ export type TourUpdateWithoutUserInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   levels?: Prisma.TourLevelUpdateManyWithoutTourNestedInput
@@ -710,6 +751,7 @@ export type TourUncheckedUpdateWithoutUserInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   levels?: Prisma.TourLevelUncheckedUpdateManyWithoutTourNestedInput
@@ -721,6 +763,7 @@ export type TourUncheckedUpdateManyWithoutUserInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   desc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  regEnd?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -761,6 +804,7 @@ export type TourSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   title?: boolean
   desc?: boolean
   startingStack?: boolean
+  regEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -775,6 +819,7 @@ export type TourSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   desc?: boolean
   startingStack?: boolean
+  regEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -786,6 +831,7 @@ export type TourSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   desc?: boolean
   startingStack?: boolean
+  regEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -797,12 +843,13 @@ export type TourSelectScalar = {
   title?: boolean
   desc?: boolean
   startingStack?: boolean
+  regEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
 }
 
-export type TourOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "desc" | "startingStack" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["tour"]>
+export type TourOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "desc" | "startingStack" | "regEnd" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["tour"]>
 export type TourInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   levels?: boolean | Prisma.Tour$levelsArgs<ExtArgs>
@@ -828,6 +875,7 @@ export type $TourPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     title: string
     desc: string | null
     startingStack: number | null
+    regEnd: number | null
     createdAt: Date
     updatedAt: Date
     userId: number
@@ -1261,6 +1309,7 @@ export interface TourFieldRefs {
   readonly title: Prisma.FieldRef<"Tour", 'String'>
   readonly desc: Prisma.FieldRef<"Tour", 'String'>
   readonly startingStack: Prisma.FieldRef<"Tour", 'Int'>
+  readonly regEnd: Prisma.FieldRef<"Tour", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Tour", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tour", 'DateTime'>
   readonly userId: Prisma.FieldRef<"Tour", 'Int'>

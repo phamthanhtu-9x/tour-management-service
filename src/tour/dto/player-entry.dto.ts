@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class PlayerEntryDto {
   @ApiProperty({ description: 'Tên người chơi', example: 'Nguyễn Văn A' })
@@ -23,4 +30,14 @@ export class PlayerEntryDto {
   @IsBoolean()
   @IsOptional()
   isEliminated?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Số lần re-buy của người chơi',
+    default: 0,
+    example: 0,
+  })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  reBuyCount?: number;
 }

@@ -16,7 +16,7 @@ import { TourService } from './tour.service';
 import { GetUser } from '../auth/decorator';
 import { InsertTourDto } from './dto';
 import { UpdateTourDto } from './dto/update.tour.dto';
-import { SetLevelDto, PlayerEntryDto } from './dto';
+import { SetLevelDto, PlayerEntryDto, UpdateGtdDto } from './dto';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import {
   ApiBearerAuth,
@@ -171,6 +171,26 @@ export class TourController {
     return this.tourService.resetClock(userId, tourId);
   }
 
+  @ApiOperation({ summary: 'Tua tới 5 giây trong level hiện tại' })
+  @ApiResponse({ status: 200, description: 'Tua tới thành công.' })
+  @Patch(':id/control/forward')
+  forwardTime(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+  ) {
+    return this.tourService.forwardTime(userId, tourId);
+  }
+
+  @ApiOperation({ summary: 'Tua lùi 5 giây trong level hiện tại' })
+  @ApiResponse({ status: 200, description: 'Tua lùi thành công.' })
+  @Patch(':id/control/rewind')
+  rewindTime(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+  ) {
+    return this.tourService.rewindTime(userId, tourId);
+  }
+
   @ApiOperation({
     summary: 'Cập nhật danh sách entries (người chơi) của control',
   })
@@ -191,5 +211,24 @@ export class TourController {
     entries: PlayerEntryDto[],
   ) {
     return this.tourService.updateEntries(userId, tourId, entries);
+  }
+
+  @ApiOperation({ summary: 'Cập nhật chuỗi GTD (giải thưởng) của control' })
+  @ApiResponse({ status: 200, description: 'Cập nhật GTD thành công.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền điều khiển tour này.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy tour hoặc control.',
+  })
+  @Patch(':id/control/gtd')
+  updateGtd(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+    @Body() dto: UpdateGtdDto,
+  ) {
+    return this.tourService.updateGtd(userId, tourId, dto);
   }
 }
