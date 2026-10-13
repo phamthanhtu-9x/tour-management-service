@@ -692,10 +692,7 @@ export class TourService implements OnModuleDestroy {
     tourId: number,
     deltaSeconds: number,
   ) {
-    const { control, totalLevels } = await this.getOwnedControl(
-      userId,
-      tourId,
-    );
+    const { control, totalLevels } = await this.getOwnedControl(userId, tourId);
 
     this.clearLevelTimer(tourId);
 
@@ -716,7 +713,13 @@ export class TourService implements OnModuleDestroy {
    * Tua tới: advance level khi overflow, carry phần dư sang level mới.
    */
   private async forwardOverflow(
-    control: { id: number; currentLevel: number; isPaused: boolean; pausedAtSecond: number; levelStartedAt: Date | null },
+    control: {
+      id: number;
+      currentLevel: number;
+      isPaused: boolean;
+      pausedAtSecond: number;
+      levelStartedAt: Date | null;
+    },
     totalLevels: number,
     tourId: number,
     deltaSeconds: number,
@@ -725,7 +728,10 @@ export class TourService implements OnModuleDestroy {
     let remaining = deltaSeconds;
 
     while (remaining > 0) {
-      const duration = await this.getLevelDuration(tourId, current.currentLevel);
+      const duration = await this.getLevelDuration(
+        tourId,
+        current.currentLevel,
+      );
       const durationSeconds = (duration ?? 0) * 60;
       const elapsed = this.elapsedSeconds(current);
       const gap = durationSeconds - elapsed; // còn bao nhiêu giây nữa mới hết level
@@ -774,7 +780,13 @@ export class TourService implements OnModuleDestroy {
    * Tua lùi: retreat về level trước khi overflow, carry phần dư.
    */
   private async rewindOverflow(
-    control: { id: number; currentLevel: number; isPaused: boolean; pausedAtSecond: number; levelStartedAt: Date | null },
+    control: {
+      id: number;
+      currentLevel: number;
+      isPaused: boolean;
+      pausedAtSecond: number;
+      levelStartedAt: Date | null;
+    },
     tourId: number,
     deltaSeconds: number, // luôn âm
   ) {
