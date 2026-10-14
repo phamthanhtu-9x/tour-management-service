@@ -6,6 +6,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { TourLevelItemDto } from './tour-level-item.dto';
@@ -36,12 +37,15 @@ export class UpdateTourDto {
   startingStack?: number;
 
   @ApiPropertyOptional({
-    description: 'Idx của level mà thời gian đăng ký (re-entry) kết thúc',
+    description:
+      'Idx của level mà thời gian đăng ký (re-entry) kết thúc. Gửi null để bỏ giới hạn',
     example: 6,
+    nullable: true,
   })
   @IsInt()
+  @Min(1)
   @IsOptional()
-  regEnd?: number;
+  regEnd?: number | null;
 
   @ApiPropertyOptional({
     description:

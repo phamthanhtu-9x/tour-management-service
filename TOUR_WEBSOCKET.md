@@ -133,7 +133,7 @@ Rời khỏi room, ngừng nhận update.
 
 ### 4.1. `tour-state` ⭐ Trạng thái Clock
 
-Server push mỗi khi state tour thay đổi (start, pause, resume, next level, prev level, set level, reset, update entries, update GTD).
+Server push mỗi khi state tour thay đổi (start, pause, resume, next level, prev level, set level, reset, update entries, update GTD, đổi `regEnd`, đổi levels).
 
 **Payload:**
 
@@ -166,6 +166,17 @@ interface TourState {
 
   /** Chuỗi GTD (giải thưởng), ví dụ '10/5/3/3/1/..' */
   gtd: string | null;
+
+  /** Idx của level mà đăng ký (re-entry) kết thúc. null = không giới hạn */
+  regEnd: number | null;
+
+  /**
+   * Đăng ký còn mở hay không – do SERVER tính:
+   * `regEnd === null || currentLevel <= regEnd`
+   * (mở cho tới HẾT level regEnd, đóng từ level regEnd + 1).
+   * Tự cập nhật khi chuyển level (kể cả auto-advance), không cần client tự tính.
+   */
+  isRegOpen: boolean;
 }
 
 interface PlayerEntry {
@@ -190,7 +201,9 @@ interface PlayerEntry {
     { "name": "Nguyễn Văn A", "isEliminated": false, "reBuyCount": 2 },
     { "name": "Trần Thị B", "avatar": "https://...", "isEliminated": true, "reBuyCount": 0 }
   ],
-  "gtd": "100/60/40/25/15/10"
+  "gtd": "100/60/40/25/15/10",
+  "regEnd": 6,
+  "isRegOpen": true
 }
 ```
 
@@ -209,6 +222,11 @@ interface PlayerEntry {
 | Rewind 5s (tua lùi) | `PATCH /tours/:id/control/rewind` |
 | Update entries | `PATCH /tours/:id/control/entries` |
 | Update GTD | `PATCH /tours/:id/control/gtd` |
+| Đổi `regEnd` (kể cả gửi `null` để bỏ giới hạn) | `PATCH /tours/:id` với body chứa `regEnd` |
+| Đổi levels (`totalLevels` có thể đổi) | `PATCH /tours/:id` với body chứa `levels` |
+| Tự chuyển level khi hết giờ | _(server timer)_ |
+
+> `isRegOpen` thay đổi khi `currentLevel` vượt qua `regEnd` → mọi hành động đổi level ở trên đều tự đẩy `isRegOpen` mới.
 
 ### 4.2. `tour-levels` ⭐ Danh sách Level
 
@@ -284,7 +302,9 @@ interface TourLevelData {
 |-----------|---------------|
 | Cập nhật tour có kèm `levels` | `PATCH /tours/:id` với body chứa `levels` |
 
-> **Lưu ý:** Nếu `PATCH /tours/:id` chỉ đổi title/desc/startingStack/regEnd (không gửi `levels`), sẽ **không** broadcast `tour-levels`.
+> **Lưu ý:** Nếu `PATCH /tours/:id` chỉ đổi title/desc/startingStack/regEnd (không gửi `levels`), sẽ **không** broadcast `tour-levels`. Riêng đổi `regEnd` sẽ broadcast `tour-state` (xem 4.1); title/desc/startingStack hiện chưa có real-time.
+>
+> **Validate `regEnd`:** phải là số nguyên ≥ 1 và không vượt quá số level của tour (tính theo bộ level sau khi cập nhật). Vi phạm → `400 Bad Request`.
 
 ### 4.3. `tour-error`
 
@@ -308,7 +328,7 @@ Server gửi khi có lỗi xảy ra.
 3. Frontend emit 'join-tour' { tourId: 1 }
 4. Server kiểm tra quyền → OK
 5. Server emit ngay 'tour-state' với state hiện tại
-   → { currentLevel: 2, isPaused: false, elapsedSeconds: 630, entries: [...], gtd: '...' }
+   → { currentLevel: 2, isPaused: false, elapsedSeconds: 630, entries: [...], gtd: '...', regEnd: 6, isRegOpen: true }
 6. Server emit ngay 'tour-levels' với danh sách level
    → { tourId: 1, levels: [...] }
 7. Frontend hiển thị: Level 2, 10:30 đã trôi, danh sách level đầy đủ
@@ -398,9 +418,9 @@ Tất cả REST endpoints vẫn hoạt động như cũ.
 
 | Endpoint | Mô tả |
 |----------|-------|
-| `GET /tours/:id/control` | Lấy trạng thái clock (có `elapsedSeconds`, `totalLevels`, `entries`, `gtd`) |
+| `GET /tours/:id/control` | Lấy trạng thái clock (có `elapsedSeconds`, `totalLevels`, `entries`, `gtd`, `regEnd`, `isRegOpen`) |
 | `GET /tours/:id/levels` | Lấy danh sách level |
-| `PATCH /tours/:id` | Cập nhật tour (có thể kèm `levels`) |
+| `PATCH /tours/:id` | Cập nhật tour (có thể kèm `levels`, `regEnd`) |
 | `PATCH /tours/:id/control/start` | Start clock |
 | `PATCH /tours/:id/control/pause` | Pause clock |
 | `PATCH /tours/:id/control/resume` | Resume clock |
@@ -452,6 +472,8 @@ export interface TourState {
   totalLevels: number;
   entries: PlayerEntry[];
   gtd: string | null;
+  regEnd: number | null;
+  isRegOpen: boolean;
 }
 
 export interface PlayerEntry {

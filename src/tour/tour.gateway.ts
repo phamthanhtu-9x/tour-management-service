@@ -18,6 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TourService } from './tour.service';
+import { isRegistrationOpen } from './tour.utils';
 
 /**
  * Một entry (người chơi) trong danh sách entries của tour control.
@@ -60,6 +61,18 @@ export interface TourState {
   entries: PlayerEntry[];
   /** Chuỗi GTD (giải thưởng) dạng '10/5/3/3/1/..' */
   gtd: string | null;
+  /** Idx của level mà đăng ký (re-entry) kết thúc; null = không giới hạn */
+  regEnd: number | null;
+  /** Đăng ký còn mở: regEnd null hoặc currentLevel <= regEnd */
+  isRegOpen: boolean;
+}
+
+/**
+ * Dữ liệu gắn vào `socket.data` sau khi xác thực.
+ */
+interface SocketData {
+  userId?: number;
+  email?: string;
 }
 
 export interface TourLevelsPayload {
@@ -96,17 +109,21 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * Trả về payload (chứa `sub` là userId, `email`...).
    */
   private verifyToken(client: Socket): { sub: number; email: string } {
+    const auth = client.handshake.auth as { token?: string } | undefined;
     const token: string | undefined =
-      client.handshake.auth?.token || client.handshake.query?.token;
+      auth?.token || (client.handshake.query?.token as string | undefined);
 
     if (!token) {
       throw new UnauthorizedException('Thiếu token xác thực');
     }
 
     try {
-      const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      });
+      const payload = this.jwtService.verify<{ sub: number; email: string }>(
+        token,
+        {
+          secret: this.configService.get<string>('JWT_SECRET'),
+        },
+      );
       return payload;
     } catch {
       throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
@@ -140,12 +157,13 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Connection lifecycle
   // ---------------------------------------------------------------------------
 
-  async handleConnection(client: Socket): Promise<void> {
+  handleConnection(client: Socket): void {
     try {
       const payload = this.verifyToken(client);
       // Lưu userId vào socket data để dùng sau
-      client.data.userId = payload.sub;
-      client.data.email = payload.email;
+      const socketData = client.data as SocketData;
+      socketData.userId = payload.sub;
+      socketData.email = payload.email;
     } catch (err) {
       client.emit('tour-error', {
         message: err instanceof Error ? err.message : 'Xác thực thất bại',
@@ -154,7 +172,7 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(_client: Socket): void {
+  handleDisconnect(): void {
     // Không cần cleanup đặc biệt – Socket.IO tự rời room khi disconnect
   }
 
@@ -171,7 +189,7 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { tourId: number },
   ): Promise<void> {
     try {
-      const userId = client.data.userId as number;
+      const userId = (client.data as SocketData).userId;
       if (!userId) {
         throw new UnauthorizedException('Chưa xác thực');
       }
@@ -286,6 +304,7 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): Promise<TourState> {
     const control = await this.prismaService.tourControl.findUnique({
       where: { tourId },
+      include: { tour: { select: { regEnd: true } } },
     });
 
     if (!control) {
@@ -298,6 +317,7 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Tính elapsedSeconds bằng server clock
     const elapsedSeconds = this.calcElapsedSeconds(control);
+    const regEnd = control.tour?.regEnd ?? null;
 
     return {
       tourId,
@@ -308,6 +328,8 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
       totalLevels,
       entries: (control.entries ?? []) as unknown as PlayerEntry[],
       gtd: control.gtd,
+      regEnd,
+      isRegOpen: isRegistrationOpen(regEnd, control.currentLevel),
     };
   }
 

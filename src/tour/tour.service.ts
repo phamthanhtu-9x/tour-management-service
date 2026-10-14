@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -18,6 +19,7 @@ import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import { PaginatedResource } from 'src/common/interfaces/paginated-res.interface';
 import { DEFAULT_TOUR_LEVELS } from './tour.constants';
 import { TourGateway } from './tour.gateway';
+import { isRegistrationOpen } from './tour.utils';
 
 @Injectable()
 export class TourService implements OnModuleDestroy {
@@ -107,7 +109,10 @@ export class TourService implements OnModuleDestroy {
   }
 
   async getTourControl(userId: number, tourId: number) {
-    const { control, totalLevels } = await this.getOwnedControl(userId, tourId);
+    const { control, totalLevels, regEnd } = await this.getOwnedControl(
+      userId,
+      tourId,
+    );
 
     // Fallback: nếu elapsed >= duration mà chưa được advance (vd mất timer do restart)
     const advanced = await this.ensureAdvanceIfExpired(
@@ -126,6 +131,11 @@ export class TourService implements OnModuleDestroy {
         entries: updated.control.entries ?? [],
         elapsedSeconds: elapsed,
         totalLevels: updated.totalLevels,
+        regEnd: updated.regEnd,
+        isRegOpen: isRegistrationOpen(
+          updated.regEnd,
+          updated.control.currentLevel,
+        ),
       };
     }
 
@@ -135,6 +145,8 @@ export class TourService implements OnModuleDestroy {
       entries: control.entries ?? [],
       elapsedSeconds: elapsed,
       totalLevels,
+      regEnd,
+      isRegOpen: isRegistrationOpen(regEnd, control.currentLevel),
     };
   }
 
@@ -157,6 +169,8 @@ export class TourService implements OnModuleDestroy {
             ante: level.ante,
           }))
         : DEFAULT_TOUR_LEVELS;
+
+    this.assertValidRegEnd(insertTourDto.regEnd, levels.length);
 
     const tour = await this.prismaService.tour.create({
       data: {
@@ -201,6 +215,17 @@ export class TourService implements OnModuleDestroy {
     }
 
     const { levels, ...rest } = updateTourDto;
+    // regEnd có trong body (kể cả null để xoá giới hạn)
+    const regEndChanged = rest.regEnd !== undefined;
+
+    // regEnd phải hợp lệ với bộ level SAU khi cập nhật
+    if (regEndChanged || levels) {
+      const nextRegEnd = regEndChanged ? rest.regEnd : tour.regEnd;
+      const nextTotalLevels = levels
+        ? levels.length
+        : await this.prismaService.tourLevel.count({ where: { tourId } });
+      this.assertValidRegEnd(nextRegEnd, nextTotalLevels);
+    }
 
     const result = await this.prismaService.tour.update({
       where: {
@@ -230,11 +255,26 @@ export class TourService implements OnModuleDestroy {
     // Nếu levels thay đổi, broadcast real-time đến các client đang xem tour
     if (levels) {
       await this.tourGateway.broadcastTourLevels(tourId);
-      // Đồng thời broadcast lại tour-state vì totalLevels có thể đã thay đổi
+    }
+    // tour-state chứa totalLevels, regEnd, isRegOpen → broadcast khi một trong
+    // các giá trị này có thể đã thay đổi
+    if (levels || regEndChanged) {
       await this.tourGateway.broadcastTourState(tourId);
     }
 
     return result;
+  }
+
+  /** regEnd phải nằm trong số level của tour (null/undefined = không giới hạn). */
+  private assertValidRegEnd(
+    regEnd: number | null | undefined,
+    totalLevels: number,
+  ): void {
+    if (regEnd != null && regEnd > totalLevels) {
+      throw new BadRequestException(
+        `regEnd (${regEnd}) vượt quá số level của tour (${totalLevels})`,
+      );
+    }
   }
 
   async deleteTour(tourId: number) {
@@ -280,7 +320,11 @@ export class TourService implements OnModuleDestroy {
       throw new NotFoundException('Tour chưa có cấu hình điều khiển');
     }
 
-    return { control: tour.control, totalLevels: tour._count.levels };
+    return {
+      control: tour.control,
+      totalLevels: tour._count.levels,
+      regEnd: tour.regEnd,
+    };
   }
 
   private updateControl(

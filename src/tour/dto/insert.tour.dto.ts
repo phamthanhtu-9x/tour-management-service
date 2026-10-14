@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
 export class InsertTourDto {
   @ApiProperty({
@@ -25,4 +25,14 @@ export class InsertTourDto {
   @IsInt()
   @IsOptional()
   startingStack?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Idx của level mà thời gian đăng ký (re-entry) kết thúc. Bỏ trống = không giới hạn',
+    example: 6,
+  })
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  regEnd?: number;
 }

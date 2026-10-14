@@ -32,23 +32,31 @@ const mockConfigService = {
 describe('TourGateway', () => {
   let gateway: TourGateway;
 
+  // Giữ tham chiếu riêng tới từng mock để assert (tránh unbound-method)
+  const socketData: { userId?: number; email?: string } = {};
+  const socketEmit = jest.fn();
+  const socketJoin = jest.fn();
+  const socketLeave = jest.fn();
+  const socketDisconnect = jest.fn();
+
   const mockSocket = {
     id: 'test-socket-id',
     handshake: {
       auth: { token: 'valid-jwt-token' },
       query: {},
     },
-    data: {},
-    emit: jest.fn(),
-    join: jest.fn(),
-    leave: jest.fn(),
-    disconnect: jest.fn(),
+    data: socketData,
+    emit: socketEmit,
+    join: socketJoin,
+    leave: socketLeave,
+    disconnect: socketDisconnect,
   } as unknown as Socket;
 
+  const roomEmit = jest.fn();
+  const serverTo = jest.fn().mockReturnValue({ emit: roomEmit });
+
   const mockServer = {
-    to: jest.fn().mockReturnValue({
-      emit: jest.fn(),
-    }),
+    to: serverTo,
   } as unknown as Server;
 
   beforeEach(async () => {
@@ -68,44 +76,44 @@ describe('TourGateway', () => {
   });
 
   describe('handleConnection', () => {
-    it('nên xác thực và lưu userId khi token hợp lệ', async () => {
+    it('nên xác thực và lưu userId khi token hợp lệ', () => {
       mockJwtService.verify.mockReturnValue({ sub: 1, email: 'test@test.com' });
 
-      await gateway.handleConnection(mockSocket);
+      gateway.handleConnection(mockSocket);
 
       expect(mockJwtService.verify).toHaveBeenCalledWith('valid-jwt-token', {
         secret: 'test-jwt-secret',
       });
-      expect(mockSocket.data.userId).toBe(1);
-      expect(mockSocket.data.email).toBe('test@test.com');
-      expect(mockSocket.disconnect).not.toHaveBeenCalled();
+      expect(socketData.userId).toBe(1);
+      expect(socketData.email).toBe('test@test.com');
+      expect(socketDisconnect).not.toHaveBeenCalled();
     });
 
-    it('nên disconnect khi thiếu token', async () => {
+    it('nên disconnect khi thiếu token', () => {
       const socketNoToken = {
         ...mockSocket,
         handshake: { auth: {}, query: {} },
       } as unknown as Socket;
 
-      await gateway.handleConnection(socketNoToken);
+      gateway.handleConnection(socketNoToken);
 
-      expect(socketNoToken.emit).toHaveBeenCalledWith('tour-error', {
+      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
         message: 'Thiếu token xác thực',
       });
-      expect(socketNoToken.disconnect).toHaveBeenCalled();
+      expect(socketDisconnect).toHaveBeenCalled();
     });
 
-    it('nên disconnect khi token không hợp lệ', async () => {
+    it('nên disconnect khi token không hợp lệ', () => {
       mockJwtService.verify.mockImplementation(() => {
         throw new Error('Invalid token');
       });
 
-      await gateway.handleConnection(mockSocket);
+      gateway.handleConnection(mockSocket);
 
-      expect(mockSocket.emit).toHaveBeenCalledWith('tour-error', {
+      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
         message: 'Token không hợp lệ hoặc đã hết hạn',
       });
-      expect(mockSocket.disconnect).toHaveBeenCalled();
+      expect(socketDisconnect).toHaveBeenCalled();
     });
   });
 
@@ -113,7 +121,7 @@ describe('TourGateway', () => {
     const joinPayload = { tourId: 1 };
 
     beforeEach(() => {
-      mockSocket.data.userId = 1;
+      socketData.userId = 1;
       mockPrismaService.tour.findUnique.mockResolvedValue({
         userId: 1,
         _count: { levels: 7 },
@@ -130,8 +138,8 @@ describe('TourGateway', () => {
     it('nên join room và gửi tour-state khi thành công', async () => {
       await gateway.handleJoinTour(mockSocket, joinPayload);
 
-      expect(mockSocket.join).toHaveBeenCalledWith('tour:1');
-      expect(mockSocket.emit).toHaveBeenCalledWith(
+      expect(socketJoin).toHaveBeenCalledWith('tour:1');
+      expect(socketEmit).toHaveBeenCalledWith(
         'tour-state',
         expect.objectContaining({
           tourId: 1,
@@ -143,11 +151,11 @@ describe('TourGateway', () => {
     });
 
     it('nên gửi lỗi khi user chưa xác thực', async () => {
-      mockSocket.data.userId = undefined;
+      socketData.userId = undefined;
 
       await gateway.handleJoinTour(mockSocket, joinPayload);
 
-      expect(mockSocket.emit).toHaveBeenCalledWith('tour-error', {
+      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
         message: 'Chưa xác thực',
       });
     });
@@ -160,7 +168,7 @@ describe('TourGateway', () => {
 
       await gateway.handleJoinTour(mockSocket, joinPayload);
 
-      expect(mockSocket.emit).toHaveBeenCalledWith('tour-error', {
+      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
         message: 'Bạn không có quyền truy cập tour này',
       });
     });
@@ -169,7 +177,7 @@ describe('TourGateway', () => {
   describe('handleLeaveTour', () => {
     it('nên rời room', async () => {
       await gateway.handleLeaveTour(mockSocket, { tourId: 1 });
-      expect(mockSocket.leave).toHaveBeenCalledWith('tour:1');
+      expect(socketLeave).toHaveBeenCalledWith('tour:1');
     });
   });
 
@@ -186,8 +194,7 @@ describe('TourGateway', () => {
 
       await gateway.broadcastTourState(1);
 
-      expect(mockServer.to).toHaveBeenCalledWith('tour:1');
-      const roomEmit = (mockServer.to as jest.Mock).mock.results[0].value.emit;
+      expect(serverTo).toHaveBeenCalledWith('tour:1');
       expect(roomEmit).toHaveBeenCalledWith(
         'tour-state',
         expect.objectContaining({
@@ -231,6 +238,48 @@ describe('TourGateway', () => {
 
       expect(state.elapsedSeconds).toBeGreaterThanOrEqual(5);
     });
+
+    it('nên lấy regEnd từ tour trong cùng một query', async () => {
+      mockPrismaService.tourControl.findUnique.mockResolvedValue({
+        currentLevel: 1,
+        isPaused: true,
+        pausedAtSecond: 0,
+        levelStartedAt: null,
+        entries: [],
+        tour: { regEnd: 3 },
+      });
+
+      await gateway.computeTourState(1, 7);
+
+      expect(mockPrismaService.tourControl.findUnique).toHaveBeenCalledWith({
+        where: { tourId: 1 },
+        include: { tour: { select: { regEnd: true } } },
+      });
+    });
+
+    it.each([
+      { regEnd: null, currentLevel: 5, isRegOpen: true },
+      { regEnd: 3, currentLevel: 2, isRegOpen: true },
+      { regEnd: 3, currentLevel: 3, isRegOpen: true },
+      { regEnd: 3, currentLevel: 4, isRegOpen: false },
+    ])(
+      'regEnd=$regEnd, currentLevel=$currentLevel → isRegOpen=$isRegOpen',
+      async ({ regEnd, currentLevel, isRegOpen }) => {
+        mockPrismaService.tourControl.findUnique.mockResolvedValue({
+          currentLevel,
+          isPaused: true,
+          pausedAtSecond: 0,
+          levelStartedAt: null,
+          entries: [],
+          tour: { regEnd },
+        });
+
+        const state = await gateway.computeTourState(1, 7);
+
+        expect(state.regEnd).toBe(regEnd);
+        expect(state.isRegOpen).toBe(isRegOpen);
+      },
+    );
   });
 
   describe('broadcastTourLevels', () => {
@@ -265,8 +314,7 @@ describe('TourGateway', () => {
         where: { tourId: 1 },
         orderBy: { idx: 'asc' },
       });
-      expect(mockServer.to).toHaveBeenCalledWith('tour:1');
-      const roomEmit = (mockServer.to as jest.Mock).mock.results[0].value.emit;
+      expect(serverTo).toHaveBeenCalledWith('tour:1');
       expect(roomEmit).toHaveBeenCalledWith('tour-levels', {
         tourId: 1,
         levels: [
