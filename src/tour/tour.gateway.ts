@@ -18,16 +18,27 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TourService } from './tour.service';
-import { isRegistrationOpen } from './tour.utils';
+import {
+  computeUndoableIds,
+  isRegistrationOpen,
+  normalizeEntries,
+  toEntryLogItem,
+} from './tour.utils';
 
 /**
  * Một entry (người chơi) trong danh sách entries của tour control.
  */
 export interface PlayerEntry {
+  /** Id (uuid) của entry do server sinh – dùng cho xoá/rebuy */
+  id: string;
+  /** Id của player (bảng players); không có nếu là khách vãng lai */
+  playerId?: number;
   name: string;
   avatar?: string;
   isEliminated: boolean;
   reBuyCount: number;
+  /** Số chip của từng lần add-on, ví dụ [10000, 10000] */
+  addOn: number[];
 }
 
 /**
@@ -74,6 +85,43 @@ interface SocketData {
   userId?: number;
   email?: string;
 }
+
+export type EntryLogActionType = 'ADD' | 'REMOVE' | 'REBUY' | 'BULK_UPDATE';
+
+/** Một dòng log thao tác entries (gửi cho frontend, không kèm snapshot). */
+export interface EntryLogItem {
+  id: number;
+  action: EntryLogActionType;
+  /** Id (uuid) entry bị tác động; null với BULK_UPDATE */
+  entryId: string | null;
+  /** Tên entry tại thời điểm thao tác */
+  entryName: string | null;
+  createdAt: Date;
+  /** Khác null = đã undo */
+  undoneAt: Date | null;
+}
+
+/**
+ * Payload event `tour-log`.
+ * - snapshot: gửi khi join-tour (toàn bộ log hiện có)
+ * - created:  vừa có thao tác mới
+ * - undone:   vừa undo một thao tác
+ * - reset:    log bị xoá (reset clock)
+ */
+export interface UndoState {
+  /** Còn thao tác chưa undo (nút "Hoàn tác" gần nhất bật được) */
+  canUndo: boolean;
+  /** Id các log hiện có thể hoàn tác riêng lẻ (mới nhất trước) */
+  undoableLogIds: number[];
+}
+
+export type TourLogEvent =
+  | ({ tourId: number; type: 'snapshot'; logs: EntryLogItem[] } & UndoState)
+  | ({ tourId: number; type: 'created'; log: EntryLogItem } & UndoState)
+  | ({ tourId: number; type: 'undone'; log: EntryLogItem } & UndoState)
+  | ({ tourId: number; type: 'reset' } & UndoState);
+
+export type TourLogSnapshot = Extract<TourLogEvent, { type: 'snapshot' }>;
 
 export interface TourLevelsPayload {
   tourId: number;
@@ -226,6 +274,9 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
           ante: l.ante,
         })),
       } as TourLevelsPayload);
+
+      // Snapshot log thao tác entries
+      client.emit('tour-log', await this.getLogSnapshot(tourId));
     } catch (err) {
       client.emit('tour-error', {
         message: err instanceof Error ? err.message : 'Không thể join tour',
@@ -286,6 +337,51 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(room).emit('tour-levels', payload);
   }
 
+  /**
+   * Broadcast một sự kiện log thao tác entries tới room.
+   * Được TourService gọi sau thêm/xoá/rebuy/cập nhật/undo/reset.
+   */
+  broadcastTourLog(event: TourLogEvent): void {
+    this.server.to(`tour:${event.tourId}`).emit('tour-log', event);
+  }
+
+  /** Toàn bộ log của tour (mới nhất trước) + có undo được không. */
+  async getLogSnapshot(tourId: number): Promise<TourLogSnapshot> {
+    const logs = await this.prismaService.tourEntryLog.findMany({
+      where: { tourId },
+      orderBy: { id: 'desc' },
+      select: {
+        id: true,
+        action: true,
+        entryId: true,
+        entryName: true,
+        createdAt: true,
+        undoneAt: true,
+      },
+    });
+    const items = logs.map(toEntryLogItem);
+    const active = items.filter((l) => l.undoneAt === null);
+    return {
+      tourId,
+      type: 'snapshot',
+      logs: items,
+      canUndo: active.length > 0,
+      undoableLogIds: computeUndoableIds(active),
+    };
+  }
+
+  /** Trạng thái undo hiện tại của tour (dùng kèm các event tour-log). */
+  async getUndoState(tourId: number): Promise<UndoState> {
+    const active = await this.prismaService.tourEntryLog.findMany({
+      where: { tourId, undoneAt: null },
+      select: { id: true, action: true, entryId: true },
+    });
+    return {
+      canUndo: active.length > 0,
+      undoableLogIds: computeUndoableIds(active),
+    };
+  }
+
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
@@ -326,7 +422,7 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
       isRunning: control.isRunning,
       elapsedSeconds,
       totalLevels,
-      entries: (control.entries ?? []) as unknown as PlayerEntry[],
+      entries: normalizeEntries(control.entries),
       gtd: control.gtd,
       regEnd,
       isRegOpen: isRegistrationOpen(regEnd, control.currentLevel),

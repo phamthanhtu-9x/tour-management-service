@@ -17,6 +17,13 @@ enum LevelType {
   BLIND
   BREAK
 }
+
+enum EntryLogAction {
+  ADD
+  REMOVE
+  REBUY
+  BULK_UPDATE
+}
 model User {
   id Int @id @default(autoincrement())
   email String @unique
@@ -31,6 +38,7 @@ model User {
   tours Tour[]
   defaultLevels DefaultLevel[]
   players Player[]
+  tourEntryLogs TourEntryLog[]
 
   @@map("users")
 }
@@ -49,6 +57,7 @@ model Tour {
 
   levels TourLevel[]
   control TourControl?
+  entryLogs TourEntryLog[]
 
   @@map("tours")
 }
@@ -84,7 +93,7 @@ model TourControl {
   pausedAtSecond Int       @default(0)
   levelStartedAt DateTime?
 
-  // Mảng các entry dạng { name: string; avatar?: string; isEliminated: boolean }
+  // Mảng các entry dạng { id: string (uuid); playerId?; name; avatar?; isEliminated; reBuyCount; addOn: number[] }
   entries Json @default("[]")
 
   // Chuỗi giải thưởng GTD dạng '10/5/3/3/1/..'
@@ -126,6 +135,8 @@ model Player {
 
   name   String
   avatar String?
+  // Điểm của người chơi (số thực, không âm)
+  point  Float   @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -134,4 +145,32 @@ model Player {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("players")
+}
+
+/// Log thao tác trên entries của tour (thêm/xoá/rebuy/cập nhật hàng loạt) – dùng cho undo.
+model TourEntryLog {
+  id Int @id @default(autoincrement())
+
+  action    EntryLogAction
+  /// Id (uuid) của entry bị tác động; null với BULK_UPDATE
+  entryId   String?
+  /// Tên entry tại thời điểm thao tác (để hiển thị log)
+  entryName String?
+  /// Toàn bộ entries TRƯỚC thao tác (undo sẽ khôi phục giá trị này)
+  before    Json
+  /// Toàn bộ entries SAU thao tác (dùng để phát hiện xung đột khi undo)
+  after     Json
+  /// Khác null = thao tác đã được undo
+  undoneAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tourId Int
+  tour   Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId, id])
+  @@map("tour_entry_logs")
 }

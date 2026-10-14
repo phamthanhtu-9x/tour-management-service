@@ -3,9 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseArrayPipe,
   ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -16,7 +19,7 @@ import { TourService } from './tour.service';
 import { GetUser } from '../auth/decorator';
 import { InsertTourDto } from './dto';
 import { UpdateTourDto } from './dto/update.tour.dto';
-import { SetLevelDto, PlayerEntryDto, UpdateGtdDto } from './dto';
+import { SetLevelDto, PlayerEntryDto, UpdateGtdDto, AddEntryDto } from './dto';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import {
   ApiBearerAuth,
@@ -211,6 +214,108 @@ export class TourController {
     entries: PlayerEntryDto[],
   ) {
     return this.tourService.updateEntries(userId, tourId, entries);
+  }
+
+  @ApiOperation({
+    summary: 'Thêm một entry (ghi log ADD, broadcast tour-state + tour-log)',
+  })
+  @ApiResponse({ status: 201, description: 'Thêm entry thành công.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Dữ liệu không hợp lệ hoặc playerId không thuộc về bạn.',
+  })
+  @Post(':id/control/entries')
+  addEntry(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+    @Body() dto: AddEntryDto,
+  ) {
+    return this.tourService.addEntry(userId, tourId, dto);
+  }
+
+  @ApiOperation({
+    summary: 'Hoàn tác thao tác entries gần nhất (thêm/xoá/rebuy/cập nhật)',
+  })
+  @ApiResponse({ status: 200, description: 'Hoàn tác thành công.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Không còn thao tác nào để hoàn tác.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Entries đã thay đổi, không thể hoàn tác (cần tải lại).',
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/control/entries/undo')
+  undoEntries(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+  ) {
+    return this.tourService.undoLog(userId, tourId);
+  }
+
+  @ApiOperation({
+    summary:
+      'Hoàn tác một log cụ thể (bị chặn nếu phía sau còn thao tác phụ thuộc chưa hoàn tác)',
+  })
+  @ApiResponse({ status: 200, description: 'Hoàn tác thành công.' })
+  @ApiResponse({ status: 400, description: 'Log đã được hoàn tác.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy log.' })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Còn thao tác phía sau phụ thuộc (details.blockingLogIds) hoặc không áp dụng được trên trạng thái hiện tại.',
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/control/entries/logs/:logId/undo')
+  undoLog(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+    @Param('logId', ParseIntPipe) logId: number,
+  ) {
+    return this.tourService.undoLog(userId, tourId, logId);
+  }
+
+  @ApiOperation({
+    summary: 'Lấy log thao tác entries của tour (mới nhất trước)',
+  })
+  @ApiResponse({ status: 200, description: 'Lấy log thành công.' })
+  @Get(':id/control/entries/logs')
+  getEntryLogs(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+  ) {
+    return this.tourService.getEntryLogs(userId, tourId);
+  }
+
+  @ApiOperation({
+    summary: 'Xoá một entry (ghi log REMOVE, broadcast tour-state + tour-log)',
+  })
+  @ApiResponse({ status: 200, description: 'Xoá entry thành công.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy entry.' })
+  @Delete(':id/control/entries/:entryId')
+  removeEntry(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+    @Param('entryId', ParseUUIDPipe) entryId: string,
+  ) {
+    return this.tourService.removeEntry(userId, tourId, entryId);
+  }
+
+  @ApiOperation({
+    summary:
+      'Rebuy: tăng reBuyCount của entry thêm 1 (ghi log REBUY, broadcast tour-state + tour-log)',
+  })
+  @ApiResponse({ status: 200, description: 'Rebuy thành công.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy entry.' })
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/control/entries/:entryId/rebuy')
+  rebuyEntry(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) tourId: number,
+    @Param('entryId', ParseUUIDPipe) entryId: string,
+  ) {
+    return this.tourService.rebuyEntry(userId, tourId, entryId);
   }
 
   @ApiOperation({ summary: 'Cập nhật chuỗi GTD (giải thưởng) của control' })

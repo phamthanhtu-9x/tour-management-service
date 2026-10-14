@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class UpdatePlayerDto {
   @ApiPropertyOptional({
@@ -17,4 +17,14 @@ export class UpdatePlayerDto {
   @IsString()
   @IsOptional()
   avatar?: string;
+
+  @ApiPropertyOptional({
+    description: 'Điểm của người chơi (số thực, không âm)',
+    example: 12.5,
+    minimum: 0,
+  })
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  @IsOptional()
+  point?: number;
 }

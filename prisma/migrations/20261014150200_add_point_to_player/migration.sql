@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "players" ADD COLUMN     "point" DOUBLE PRECISION NOT NULL DEFAULT 0;

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -13,13 +14,39 @@ import {
   SetLevelDto,
   PlayerEntryDto,
   UpdateGtdDto,
+  AddEntryDto,
 } from './dto';
+import { randomUUID } from 'crypto';
+import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import { PaginatedResource } from 'src/common/interfaces/paginated-res.interface';
 import { DEFAULT_TOUR_LEVELS } from './tour.constants';
-import { TourGateway } from './tour.gateway';
-import { isRegistrationOpen } from './tour.utils';
+import { EntryLogActionType, PlayerEntry, TourGateway } from './tour.gateway';
+import {
+  applyInverse,
+  findBlockingLogIds,
+  isRegistrationOpen,
+  normalizeEntries,
+  toEntryLogItem,
+} from './tour.utils';
+
+/** Các cột log trả cho frontend (không kèm snapshot before/after). */
+const LOG_SELECT = {
+  id: true,
+  action: true,
+  entryId: true,
+  entryName: true,
+  createdAt: true,
+  undoneAt: true,
+} as const;
+
+const toJson = (entries: PlayerEntry[]) =>
+  entries as unknown as Prisma.InputJsonValue;
+
+/** Bảo đảm mọi entry có id (dữ liệu cũ chưa có id sẽ được gán). */
+const withEntryIds = (entries: PlayerEntry[]): PlayerEntry[] =>
+  entries.map((entry) => (entry.id ? entry : { ...entry, id: randomUUID() }));
 
 @Injectable()
 export class TourService implements OnModuleDestroy {
@@ -128,7 +155,7 @@ export class TourService implements OnModuleDestroy {
       await this.scheduleLevelAdvance(tourId);
       return {
         ...updated.control,
-        entries: updated.control.entries ?? [],
+        entries: normalizeEntries(updated.control.entries),
         elapsedSeconds: elapsed,
         totalLevels: updated.totalLevels,
         regEnd: updated.regEnd,
@@ -142,7 +169,7 @@ export class TourService implements OnModuleDestroy {
     const elapsed = this.elapsedSeconds(control);
     return {
       ...control,
-      entries: control.entries ?? [],
+      entries: normalizeEntries(control.entries),
       elapsedSeconds: elapsed,
       totalLevels,
       regEnd,
@@ -687,19 +714,29 @@ export class TourService implements OnModuleDestroy {
   async resetClock(userId: number, tourId: number) {
     const { control } = await this.getOwnedControl(userId, tourId);
     this.clearLevelTimer(tourId);
-    const result = await this.prismaService.tourControl.update({
-      where: { id: control.id },
-      data: {
-        currentLevel: 1,
-        isPaused: true,
-        isRunning: false,
-        pausedAtSecond: 0,
-        levelStartedAt: null,
-        entries: [],
-        gtd: null,
-      },
-    });
+    // Reset clock xoá luôn entries và log thao tác entries của tour
+    const [result] = await this.prismaService.$transaction([
+      this.prismaService.tourControl.update({
+        where: { id: control.id },
+        data: {
+          currentLevel: 1,
+          isPaused: true,
+          isRunning: false,
+          pausedAtSecond: 0,
+          levelStartedAt: null,
+          entries: [],
+          gtd: null,
+        },
+      }),
+      this.prismaService.tourEntryLog.deleteMany({ where: { tourId } }),
+    ]);
     await this.tourGateway.broadcastTourState(tourId);
+    this.tourGateway.broadcastTourLog({
+      tourId,
+      type: 'reset',
+      canUndo: false,
+      undoableLogIds: [],
+    });
     return result;
   }
 
@@ -937,24 +974,285 @@ export class TourService implements OnModuleDestroy {
     }
   }
 
+  /**
+   * Mọi playerId trong entries phải là id của một player có thật
+   * và thuộc về user hiện tại.
+   */
+  private async assertOwnedPlayers(
+    userId: number,
+    entries: PlayerEntryDto[],
+  ): Promise<void> {
+    const ids = [
+      ...new Set(
+        entries
+          .map((entry) => entry.playerId)
+          .filter((id): id is number => id != null),
+      ),
+    ];
+    if (ids.length === 0) return;
+
+    const found = await this.prismaService.player.findMany({
+      where: { id: { in: ids }, userId },
+      select: { id: true },
+    });
+    const foundIds = new Set(found.map((p) => p.id));
+    const invalid = ids.filter((id) => !foundIds.has(id));
+    if (invalid.length > 0) {
+      throw new BadRequestException(
+        `playerId không tồn tại hoặc không thuộc về bạn: ${invalid.join(', ')}`,
+      );
+    }
+  }
+
+  /** Chuẩn hoá một entry từ body request (chưa gồm id). */
+  private buildEntry(dto: AddEntryDto): Omit<PlayerEntry, 'id'> {
+    return {
+      ...(dto.playerId != null ? { playerId: dto.playerId } : {}),
+      name: dto.name,
+      ...(dto.avatar !== undefined ? { avatar: dto.avatar } : {}),
+      isEliminated: dto.isEliminated ?? false,
+      reBuyCount: dto.reBuyCount ?? 0,
+      addOn: dto.addOn ?? [],
+    };
+  }
+
+  /** Khoá dòng tour_controls (FOR UPDATE) và đọc entries hiện tại. */
+  private async lockEntries(
+    tx: Prisma.TransactionClient,
+    controlId: number,
+  ): Promise<PlayerEntry[]> {
+    await tx.$queryRaw`SELECT id FROM "tour_controls" WHERE id = ${controlId} FOR UPDATE`;
+    const row = await tx.tourControl.findUniqueOrThrow({
+      where: { id: controlId },
+      select: { entries: true },
+    });
+    return withEntryIds(normalizeEntries(row.entries));
+  }
+
+  /**
+   * Thực hiện một thao tác trên entries trong transaction (khoá dòng control
+   * để tránh ghi đè khi nhiều thiết bị thao tác cùng lúc), ghi log,
+   * rồi broadcast `tour-state` + `tour-log`.
+   */
+  private async applyEntriesChange(
+    userId: number,
+    tourId: number,
+    action: EntryLogActionType,
+    change: (current: PlayerEntry[]) => {
+      next: PlayerEntry[];
+      entryId?: string | null;
+      entryName?: string | null;
+    },
+  ) {
+    const { control } = await this.getOwnedControl(userId, tourId);
+
+    const { updated, next, log } = await this.prismaService.$transaction(
+      async (tx) => {
+        const current = await this.lockEntries(tx, control.id);
+        const { next, entryId = null, entryName = null } = change(current);
+        const updated = await tx.tourControl.update({
+          where: { id: control.id },
+          data: { entries: toJson(next) },
+        });
+        const log = await tx.tourEntryLog.create({
+          data: {
+            action,
+            entryId,
+            entryName,
+            before: toJson(current),
+            after: toJson(next),
+            userId,
+            tourId,
+          },
+          select: LOG_SELECT,
+        });
+        return { updated, next, log };
+      },
+    );
+
+    const logItem = toEntryLogItem(log);
+    const undoState = await this.tourGateway.getUndoState(tourId);
+    await this.tourGateway.broadcastTourState(tourId);
+    this.tourGateway.broadcastTourLog({
+      tourId,
+      type: 'created',
+      log: logItem,
+      ...undoState,
+    });
+    return { control: updated, entries: next, log: logItem };
+  }
+
+  private findEntryIndex(entries: PlayerEntry[], entryId: string): number {
+    const idx = entries.findIndex((entry) => entry.id === entryId);
+    if (idx === -1) {
+      throw new NotFoundException('Không tìm thấy entry');
+    }
+    return idx;
+  }
+
+  /**
+   * Cập nhật hàng loạt (ghi đè toàn bộ entries). Giữ để tương thích ngược;
+   * được ghi log dạng BULK_UPDATE. Entry gửi kèm `id` sẽ giữ nguyên id,
+   * entry không có `id` được gán id mới.
+   */
   async updateEntries(
     userId: number,
     tourId: number,
     entries: PlayerEntryDto[],
   ) {
-    const { control } = await this.getOwnedControl(userId, tourId);
-    const normalized = entries.map((entry) => ({
-      name: entry.name,
-      ...(entry.avatar !== undefined ? { avatar: entry.avatar } : {}),
-      isEliminated: entry.isEliminated ?? false,
-      reBuyCount: entry.reBuyCount ?? 0,
+    const ids = entries.map((e) => e.id).filter((id): id is string => !!id);
+    if (new Set(ids).size !== ids.length) {
+      throw new BadRequestException('Danh sách entries có id bị trùng');
+    }
+    await this.assertOwnedPlayers(userId, entries);
+
+    const normalized: PlayerEntry[] = entries.map((entry) => ({
+      id: entry.id ?? randomUUID(),
+      ...this.buildEntry(entry),
     }));
-    const result = await this.prismaService.tourControl.update({
-      where: { id: control.id },
-      data: { entries: normalized },
-    });
+    const { control } = await this.applyEntriesChange(
+      userId,
+      tourId,
+      'BULK_UPDATE',
+      () => ({ next: normalized }),
+    );
+    return control;
+  }
+
+  /** Thêm một entry vào cuối danh sách. */
+  async addEntry(userId: number, tourId: number, dto: AddEntryDto) {
+    await this.assertOwnedPlayers(userId, [dto]);
+    const entry: PlayerEntry = { id: randomUUID(), ...this.buildEntry(dto) };
+    const { entries, log } = await this.applyEntriesChange(
+      userId,
+      tourId,
+      'ADD',
+      (current) => ({
+        next: [...current, entry],
+        entryId: entry.id,
+        entryName: entry.name,
+      }),
+    );
+    return { entry, entries, log };
+  }
+
+  /** Xoá một entry khỏi danh sách. */
+  async removeEntry(userId: number, tourId: number, entryId: string) {
+    const { entries, log } = await this.applyEntriesChange(
+      userId,
+      tourId,
+      'REMOVE',
+      (current) => {
+        const idx = this.findEntryIndex(current, entryId);
+        return {
+          next: current.filter((_, i) => i !== idx),
+          entryId,
+          entryName: current[idx].name,
+        };
+      },
+    );
+    return { entries, log };
+  }
+
+  /** Rebuy: tăng reBuyCount của entry thêm 1. */
+  async rebuyEntry(userId: number, tourId: number, entryId: string) {
+    let entry: PlayerEntry | undefined;
+    const { entries, log } = await this.applyEntriesChange(
+      userId,
+      tourId,
+      'REBUY',
+      (current) => {
+        const idx = this.findEntryIndex(current, entryId);
+        entry = { ...current[idx], reBuyCount: current[idx].reBuyCount + 1 };
+        const next = [...current];
+        next[idx] = entry;
+        return { next, entryId, entryName: entry.name };
+      },
+    );
+    return { entry, entries, log };
+  }
+
+  /**
+   * Hoàn tác một thao tác entries bằng THAO TÁC NGƯỢC trên danh sách hiện tại.
+   * - `logId` bỏ trống → thao tác gần nhất chưa được undo.
+   * - Bị chặn (409) nếu phía sau còn thao tác chưa undo phụ thuộc vào nó
+   *   (cùng entry, hoặc cập nhật hàng loạt) – trả kèm `details.blockingLogIds`.
+   */
+  async undoLog(userId: number, tourId: number, logId?: number) {
+    const { control } = await this.getOwnedControl(userId, tourId);
+
+    const { restored, log } = await this.prismaService.$transaction(
+      async (tx) => {
+        const current = await this.lockEntries(tx, control.id);
+        const target =
+          logId === undefined
+            ? await tx.tourEntryLog.findFirst({
+                where: { tourId, undoneAt: null },
+                orderBy: { id: 'desc' },
+              })
+            : await tx.tourEntryLog.findFirst({ where: { id: logId, tourId } });
+        if (!target) {
+          if (logId === undefined) {
+            throw new BadRequestException('Không còn thao tác nào để hoàn tác');
+          }
+          throw new NotFoundException('Không tìm thấy log');
+        }
+        if (target.undoneAt) {
+          throw new BadRequestException('Thao tác này đã được hoàn tác');
+        }
+
+        const later = await tx.tourEntryLog.findMany({
+          where: { tourId, undoneAt: null, id: { gt: target.id } },
+          select: { id: true, action: true, entryId: true },
+        });
+        const blockingLogIds = findBlockingLogIds(target, later);
+        if (blockingLogIds.length > 0) {
+          const blockedByBulk = later.some(
+            (l) => blockingLogIds.includes(l.id) && l.action === 'BULK_UPDATE',
+          );
+          throw new ConflictException({
+            message:
+              target.action === 'BULK_UPDATE'
+                ? 'Chỉ hoàn tác được cập nhật hàng loạt khi đó là thao tác mới nhất chưa hoàn tác'
+                : blockedByBulk
+                  ? 'Cần hoàn tác thao tác cập nhật hàng loạt phía sau trước'
+                  : `Cần hoàn tác các thao tác phía sau trên "${target.entryName ?? ''}" trước`,
+            error: { blockingLogIds },
+          });
+        }
+
+        const restored = applyInverse(target, current);
+        await tx.tourControl.update({
+          where: { id: control.id },
+          data: { entries: toJson(restored) },
+        });
+        const log = await tx.tourEntryLog.update({
+          where: { id: target.id },
+          data: { undoneAt: new Date() },
+          select: LOG_SELECT,
+        });
+        return { restored, log };
+      },
+    );
+
+    const logItem = toEntryLogItem(log);
+    const undoState = await this.tourGateway.getUndoState(tourId);
     await this.tourGateway.broadcastTourState(tourId);
-    return result;
+    this.tourGateway.broadcastTourLog({
+      tourId,
+      type: 'undone',
+      log: logItem,
+      ...undoState,
+    });
+    return { entries: restored, log: logItem, ...undoState };
+  }
+
+  /** Danh sách log thao tác entries (mới nhất trước). */
+  async getEntryLogs(userId: number, tourId: number) {
+    await this.getOwnedControl(userId, tourId);
+    const { logs, canUndo, undoableLogIds } =
+      await this.tourGateway.getLogSnapshot(tourId);
+    return { logs, canUndo, undoableLogIds };
   }
 
   async updateGtd(userId: number, tourId: number, dto: UpdateGtdDto) {

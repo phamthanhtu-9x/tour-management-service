@@ -19,6 +19,7 @@ const mockPrismaService = {
   tour: { findUnique: jest.fn() },
   tourControl: { findUnique: jest.fn() },
   tourLevel: { count: jest.fn(), findMany: jest.fn() },
+  tourEntryLog: { findMany: jest.fn().mockResolvedValue([]) },
 };
 
 const mockJwtService = {

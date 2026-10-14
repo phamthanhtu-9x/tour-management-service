@@ -2,6 +2,8 @@
 
 Tài liệu này mô tả cách frontend kết nối và sử dụng WebSocket để nhận real-time trạng thái của Tour Control.
 
+> Thêm / xoá / rebuy entries, log thao tác và undo: xem [`TOUR_ENTRIES_LOG.md`](./TOUR_ENTRIES_LOG.md).
+
 ---
 
 ## 1. Tổng quan
@@ -180,10 +182,25 @@ interface TourState {
 }
 
 interface PlayerEntry {
+  /** Id (uuid) của entry do server sinh – dùng cho xoá / rebuy */
+  id: string;
+
+  /**
+   * Id của người chơi trong bảng players (không có nếu là khách vãng lai).
+   * Server kiểm tra playerId tồn tại và thuộc về user khi ghi entries.
+   * Cần point → gọi `GET /players/:id` (hoặc `GET /players` rồi ghép theo id).
+   * Lưu ý: nếu player đã bị xoá sau đó, `GET /players/:id` trả 404.
+   */
+  playerId?: number;
   name: string;
   avatar?: string;
   isEliminated: boolean;
   reBuyCount: number;
+  /**
+   * Số chip của từng lần add-on (mỗi phần tử = 1 lần), ví dụ [10000, 10000].
+   * Tổng chip add-on = addOn.reduce((a, b) => a + b, 0). Mặc định [].
+   */
+  addOn: number[];
 }
 ```
 
@@ -198,8 +215,8 @@ interface PlayerEntry {
   "elapsedSeconds": 630,
   "totalLevels": 7,
   "entries": [
-    { "name": "Nguyễn Văn A", "isEliminated": false, "reBuyCount": 2 },
-    { "name": "Trần Thị B", "avatar": "https://...", "isEliminated": true, "reBuyCount": 0 }
+    { "id": "6f1c2a9e-1b2d-4c3e-8f4a-5b6c7d8e9f00", "playerId": 5, "name": "Nguyễn Văn A", "isEliminated": false, "reBuyCount": 2, "addOn": [10000, 10000] },
+    { "id": "0b7e4d21-9c3a-4f5e-a1b2-c3d4e5f60718", "name": "Trần Thị B", "avatar": "https://...", "isEliminated": true, "reBuyCount": 0, "addOn": [] }
   ],
   "gtd": "100/60/40/25/15/10",
   "regEnd": 6,
@@ -221,6 +238,7 @@ interface PlayerEntry {
 | Forward 5s (tua tới) | `PATCH /tours/:id/control/forward` |
 | Rewind 5s (tua lùi) | `PATCH /tours/:id/control/rewind` |
 | Update entries | `PATCH /tours/:id/control/entries` |
+| Thêm / xoá / rebuy entry, undo | `POST/DELETE /tours/:id/control/entries...` (xem `TOUR_ENTRIES_LOG.md`) |
 | Update GTD | `PATCH /tours/:id/control/gtd` |
 | Đổi `regEnd` (kể cả gửi `null` để bỏ giới hạn) | `PATCH /tours/:id` với body chứa `regEnd` |
 | Đổi levels (`totalLevels` có thể đổi) | `PATCH /tours/:id` với body chứa `levels` |
@@ -315,6 +333,25 @@ Server gửi khi có lỗi xảy ra.
   "message": "Token không hợp lệ hoặc đã hết hạn"
 }
 ```
+
+### 4.4. `tour-log` ⭐ Log thao tác entries
+
+Server push khi có thao tác thêm / xoá / rebuy / cập nhật entries, undo, hoặc reset clock; và gửi `snapshot` ngay sau `join-tour`.
+
+```typescript
+interface UndoState {
+  canUndo: boolean;          // còn thao tác chưa hoàn tác
+  undoableLogIds: number[];  // id các log hoàn tác riêng lẻ được
+}
+
+type TourLogEvent =
+  | ({ tourId: number; type: 'snapshot'; logs: EntryLogItem[] } & UndoState)
+  | ({ tourId: number; type: 'created';  log: EntryLogItem }    & UndoState)
+  | ({ tourId: number; type: 'undone';   log: EntryLogItem }    & UndoState)
+  | ({ tourId: number; type: 'reset' }                          & UndoState);
+```
+
+Chi tiết `EntryLogItem`, cách xử lý từng `type` và reducer mẫu: xem [`TOUR_ENTRIES_LOG.md`](./TOUR_ENTRIES_LOG.md#5-websocket--event-tour-log).
 
 ---
 
@@ -427,8 +464,14 @@ Tất cả REST endpoints vẫn hoạt động như cũ.
 | `PATCH /tours/:id/control/next` | Next level |
 | `PATCH /tours/:id/control/prev` | Previous level |
 | `PATCH /tours/:id/control/set-level` | Nhảy tới level cụ thể |
-| `PATCH /tours/:id/control/reset` | Reset clock |
-| `PATCH /tours/:id/control/entries` | Cập nhật danh sách người chơi |
+| `PATCH /tours/:id/control/reset` | Reset clock (xoá luôn entries và log thao tác entries) |
+| `PATCH /tours/:id/control/entries` | Cập nhật hàng loạt danh sách người chơi (gửi kèm `id` để giữ entry; mỗi entry có thể kèm `playerId`; playerId không tồn tại/không thuộc về bạn → `400`; ghi log `BULK_UPDATE`) |
+| `POST /tours/:id/control/entries` | Thêm một entry (log `ADD`) |
+| `DELETE /tours/:id/control/entries/:entryId` | Xoá một entry (log `REMOVE`) |
+| `POST /tours/:id/control/entries/:entryId/rebuy` | Rebuy +1 (log `REBUY`) |
+| `POST /tours/:id/control/entries/undo` | Hoàn tác thao tác entries gần nhất |
+| `POST /tours/:id/control/entries/logs/:logId/undo` | Hoàn tác một log cụ thể (409 + `details.blockingLogIds` nếu bị chặn) |
+| `GET /tours/:id/control/entries/logs` | Lấy log thao tác entries |
 | `PATCH /tours/:id/control/gtd` | Cập nhật GTD |
 
 > **Khuyến nghị:** Dùng REST để lấy dữ liệu ban đầu (nếu muốn có trước khi WebSocket connect), WebSocket để nhận update real-time. Tuy nhiên với `join-tour`, bạn nhận được snapshot đầy đủ ngay nên có thể không cần gọi REST.
@@ -477,10 +520,13 @@ export interface TourState {
 }
 
 export interface PlayerEntry {
+  id: string;
+  playerId?: number;
   name: string;
   avatar?: string;
   isEliminated: boolean;
   reBuyCount: number;
+  addOn: number[];
 }
 
 // ===== tour-levels =====
@@ -518,6 +564,7 @@ export interface ServerToClientEvents {
   'tour-state': (state: TourState) => void;
   'tour-levels': (payload: TourLevelsPayload) => void;
   'tour-error': (error: TourError) => void;
+  'tour-log': (event: TourLogEvent) => void; // xem TOUR_ENTRIES_LOG.md
 }
 ```
 
