@@ -43,6 +43,8 @@ export type PlayerMinAggregateOutputType = {
   name: string | null
   avatar: string | null
   point: number | null
+  phone: string | null
+  searchName: string | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: number | null
@@ -53,6 +55,8 @@ export type PlayerMaxAggregateOutputType = {
   name: string | null
   avatar: string | null
   point: number | null
+  phone: string | null
+  searchName: string | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: number | null
@@ -63,6 +67,8 @@ export type PlayerCountAggregateOutputType = {
   name: number
   avatar: number
   point: number
+  phone: number
+  searchName: number
   createdAt: number
   updatedAt: number
   userId: number
@@ -87,6 +93,8 @@ export type PlayerMinAggregateInputType = {
   name?: true
   avatar?: true
   point?: true
+  phone?: true
+  searchName?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -97,6 +105,8 @@ export type PlayerMaxAggregateInputType = {
   name?: true
   avatar?: true
   point?: true
+  phone?: true
+  searchName?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -107,6 +117,8 @@ export type PlayerCountAggregateInputType = {
   name?: true
   avatar?: true
   point?: true
+  phone?: true
+  searchName?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -204,6 +216,8 @@ export type PlayerGroupByOutputType = {
   name: string
   avatar: string | null
   point: number
+  phone: string | null
+  searchName: string
   createdAt: Date
   updatedAt: Date
   userId: number
@@ -237,6 +251,8 @@ export type PlayerWhereInput = {
   name?: Prisma.StringFilter<"Player"> | string
   avatar?: Prisma.StringNullableFilter<"Player"> | string | null
   point?: Prisma.FloatFilter<"Player"> | number
+  phone?: Prisma.StringNullableFilter<"Player"> | string | null
+  searchName?: Prisma.StringFilter<"Player"> | string
   createdAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   userId?: Prisma.IntFilter<"Player"> | number
@@ -248,6 +264,8 @@ export type PlayerOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   point?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  searchName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -256,23 +274,28 @@ export type PlayerOrderByWithRelationInput = {
 
 export type PlayerWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  userId_phone?: Prisma.PlayerUserIdPhoneCompoundUniqueInput
   AND?: Prisma.PlayerWhereInput | Prisma.PlayerWhereInput[]
   OR?: Prisma.PlayerWhereInput[]
   NOT?: Prisma.PlayerWhereInput | Prisma.PlayerWhereInput[]
   name?: Prisma.StringFilter<"Player"> | string
   avatar?: Prisma.StringNullableFilter<"Player"> | string | null
   point?: Prisma.FloatFilter<"Player"> | number
+  phone?: Prisma.StringNullableFilter<"Player"> | string | null
+  searchName?: Prisma.StringFilter<"Player"> | string
   createdAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   userId?: Prisma.IntFilter<"Player"> | number
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id">
+}, "id" | "userId_phone">
 
 export type PlayerOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   point?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  searchName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -291,6 +314,8 @@ export type PlayerScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Player"> | string
   avatar?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
   point?: Prisma.FloatWithAggregatesFilter<"Player"> | number
+  phone?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
+  searchName?: Prisma.StringWithAggregatesFilter<"Player"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Player"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Player"> | Date | string
   userId?: Prisma.IntWithAggregatesFilter<"Player"> | number
@@ -300,6 +325,8 @@ export type PlayerCreateInput = {
   name: string
   avatar?: string | null
   point?: number
+  phone?: string | null
+  searchName?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPlayersInput
@@ -310,6 +337,8 @@ export type PlayerUncheckedCreateInput = {
   name: string
   avatar?: string | null
   point?: number
+  phone?: string | null
+  searchName?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: number
@@ -319,6 +348,8 @@ export type PlayerUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   point?: Prisma.FloatFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  searchName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPlayersNestedInput
@@ -329,6 +360,8 @@ export type PlayerUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   point?: Prisma.FloatFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  searchName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -339,6 +372,8 @@ export type PlayerCreateManyInput = {
   name: string
   avatar?: string | null
   point?: number
+  phone?: string | null
+  searchName?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: number
@@ -348,6 +383,8 @@ export type PlayerUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   point?: Prisma.FloatFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  searchName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -357,6 +394,8 @@ export type PlayerUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   point?: Prisma.FloatFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  searchName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -372,11 +411,18 @@ export type PlayerOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type PlayerUserIdPhoneCompoundUniqueInput = {
+  userId: number
+  phone: string
+}
+
 export type PlayerCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
   point?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  searchName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -393,6 +439,8 @@ export type PlayerMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
   point?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  searchName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -403,6 +451,8 @@ export type PlayerMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
   point?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  searchName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -468,6 +518,8 @@ export type PlayerCreateWithoutUserInput = {
   name: string
   avatar?: string | null
   point?: number
+  phone?: string | null
+  searchName?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -477,6 +529,8 @@ export type PlayerUncheckedCreateWithoutUserInput = {
   name: string
   avatar?: string | null
   point?: number
+  phone?: string | null
+  searchName?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -515,6 +569,8 @@ export type PlayerScalarWhereInput = {
   name?: Prisma.StringFilter<"Player"> | string
   avatar?: Prisma.StringNullableFilter<"Player"> | string | null
   point?: Prisma.FloatFilter<"Player"> | number
+  phone?: Prisma.StringNullableFilter<"Player"> | string | null
+  searchName?: Prisma.StringFilter<"Player"> | string
   createdAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   userId?: Prisma.IntFilter<"Player"> | number
@@ -525,6 +581,8 @@ export type PlayerCreateManyUserInput = {
   name: string
   avatar?: string | null
   point?: number
+  phone?: string | null
+  searchName?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -533,6 +591,8 @@ export type PlayerUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   point?: Prisma.FloatFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  searchName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -542,6 +602,8 @@ export type PlayerUncheckedUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   point?: Prisma.FloatFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  searchName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -551,6 +613,8 @@ export type PlayerUncheckedUpdateManyWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   point?: Prisma.FloatFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  searchName?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -562,6 +626,8 @@ export type PlayerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name?: boolean
   avatar?: boolean
   point?: boolean
+  phone?: boolean
+  searchName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -573,6 +639,8 @@ export type PlayerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   name?: boolean
   avatar?: boolean
   point?: boolean
+  phone?: boolean
+  searchName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -584,6 +652,8 @@ export type PlayerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   name?: boolean
   avatar?: boolean
   point?: boolean
+  phone?: boolean
+  searchName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -595,12 +665,14 @@ export type PlayerSelectScalar = {
   name?: boolean
   avatar?: boolean
   point?: boolean
+  phone?: boolean
+  searchName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
 }
 
-export type PlayerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "avatar" | "point" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["player"]>
+export type PlayerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "avatar" | "point" | "phone" | "searchName" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["player"]>
 export type PlayerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -621,6 +693,8 @@ export type $PlayerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     name: string
     avatar: string | null
     point: number
+    phone: string | null
+    searchName: string
     createdAt: Date
     updatedAt: Date
     userId: number
@@ -1052,6 +1126,8 @@ export interface PlayerFieldRefs {
   readonly name: Prisma.FieldRef<"Player", 'String'>
   readonly avatar: Prisma.FieldRef<"Player", 'String'>
   readonly point: Prisma.FieldRef<"Player", 'Float'>
+  readonly phone: Prisma.FieldRef<"Player", 'String'>
+  readonly searchName: Prisma.FieldRef<"Player", 'String'>
   readonly createdAt: Prisma.FieldRef<"Player", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Player", 'DateTime'>
   readonly userId: Prisma.FieldRef<"Player", 'Int'>

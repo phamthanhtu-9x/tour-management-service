@@ -19,8 +19,7 @@ import {
 import { MyJwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
 import { PlayerService } from './player.service';
-import { InsertPlayerDto, UpdatePlayerDto } from './dto';
-import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
+import { InsertPlayerDto, SearchPlayerQueryDto, UpdatePlayerDto } from './dto';
 
 @ApiTags('Players')
 @ApiBearerAuth()
@@ -30,14 +29,15 @@ export class PlayerController {
   constructor(private playerService: PlayerService) {}
 
   @ApiOperation({
-    summary: 'Lấy danh sách người chơi của người dùng (Có phân trang)',
+    summary:
+      'Lấy danh sách người chơi của người dùng (Có phân trang, tìm theo tên hoặc số điện thoại qua `search`)',
   })
   @ApiResponse({ status: 200, description: 'Lấy danh sách thành công.' })
   @ApiResponse({ status: 401, description: 'Chưa xác thực (Unauthorized).' })
   @Get()
   getPlayers(
     @GetUser('id') userId: number,
-    @Query() query: PaginationQueryDto,
+    @Query() query: SearchPlayerQueryDto,
   ) {
     return this.playerService.getPlayers(userId, query);
   }

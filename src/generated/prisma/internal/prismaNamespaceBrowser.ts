@@ -161,6 +161,8 @@ export const PlayerScalarFieldEnum = {
   name: 'name',
   avatar: 'avatar',
   point: 'point',
+  phone: 'phone',
+  searchName: 'searchName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'

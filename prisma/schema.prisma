@@ -137,6 +137,10 @@ model Player {
   avatar String?
   // Điểm của người chơi (số thực, không âm)
   point  Float   @default(0)
+  // Số điện thoại (đã chuẩn hoá: chỉ chữ số, có thể có '+' ở đầu); không trùng trong cùng user
+  phone  String?
+  // Tên đã bỏ dấu + chữ thường để tìm kiếm (server tự cập nhật, không trả cho client)
+  searchName String @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -144,6 +148,7 @@ model Player {
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, phone])
   @@map("players")
 }
 
