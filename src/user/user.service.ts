@@ -33,6 +33,7 @@ export class UserService {
           displayName: true,
           avatar: true,
           slug: true,
+          role: true,
           createdAt: true,
           updatedAt: true,
         },

@@ -8,6 +8,8 @@ import { SetupModule } from './setup/setup.module';
 import { PlayerModule } from './player/player.module';
 import { PublicModule } from './public/public.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { PlanModule } from './plan/plan.module';
+import { AdminModule } from './admin/admin.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -17,11 +19,13 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     TourModule,
     PrismaModule,
+    PlanModule,
     UploadModule,
     SetupModule,
     PlayerModule,
     PublicModule,
     DashboardModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

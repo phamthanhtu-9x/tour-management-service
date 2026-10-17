@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prisma:dev:deploy": "prisma migrate deploy",
+    "admin:promote": "node -r dotenv/config scripts/promote-super-admin.js",
     "db:dev:remove": "docker compose rm dev-database --stop --force --volumes",
     "db:dev:create": "docker compose up -d dev-database --detach",
     "db:dev:restart": "npm run db:dev:remove && npm run db:dev:create && npm run prisma:dev:deploy",

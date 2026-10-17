@@ -13,11 +13,15 @@ import { Prisma } from 'src/generated/prisma/client';
 /** Cột nội bộ, không trả cho client. */
 const OMIT_INTERNAL = { searchName: true } as const;
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PlanService } from 'src/plan/plan.service';
 import { PaginatedResource } from 'src/common/interfaces/paginated-res.interface';
 
 @Injectable()
 export class PlayerService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private planService: PlanService,
+  ) {}
 
   async getPlayers(
     userId: number,
@@ -57,6 +61,7 @@ export class PlayerService {
    * Lọc theo `search` giống danh sách, cùng thứ tự (mới tạo trước), không phân trang.
    */
   async exportPlayers(userId: number, search?: string): Promise<Buffer> {
+    await this.planService.assertCanExportPlayers(userId);
     const players = await this.prismaService.player.findMany({
       where: this.buildSearchWhere(userId, search),
       orderBy: { createdAt: 'desc' },
@@ -144,6 +149,7 @@ export class PlayerService {
   }
 
   async insertPlayer(userId: number, dto: InsertPlayerDto) {
+    await this.planService.assertCanAddPlayer(userId);
     await this.assertPhoneAvailable(userId, dto.phone);
     try {
       return await this.prismaService.player.create({

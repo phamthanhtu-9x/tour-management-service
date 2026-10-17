@@ -52,3 +52,9 @@ export type Player = Prisma.PlayerModel
  * Log thao tác trên entries của tour (thêm/xoá/rebuy/cập nhật hàng loạt) – dùng cho undo.
  */
 export type TourEntryLog = Prisma.TourEntryLogModel
+/**
+ * Model PlanLimit
+ * Giới hạn tính năng theo gói (TRIAL / STANDARD) – super admin chỉnh qua API.
+ * Giá trị số = null nghĩa là không giới hạn.
+ */
+export type PlanLimit = Prisma.PlanLimitModel

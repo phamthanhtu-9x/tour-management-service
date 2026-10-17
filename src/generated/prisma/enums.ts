@@ -17,6 +17,15 @@ export const LevelType = {
 export type LevelType = (typeof LevelType)[keyof typeof LevelType]
 
 
+export const UserRole = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  TRIAL: 'TRIAL',
+  STANDARD: 'STANDARD'
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
 export const EntryLogAction = {
   ADD: 'ADD',
   REMOVE: 'REMOVE',

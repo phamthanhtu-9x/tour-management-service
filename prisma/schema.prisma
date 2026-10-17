@@ -18,6 +18,13 @@ enum LevelType {
   BREAK
 }
 
+/// Vai trò của user. TRIAL / STANDARD đồng thời là gói sử dụng (xem PlanLimit).
+enum UserRole {
+  SUPER_ADMIN
+  TRIAL
+  STANDARD
+}
+
 enum EntryLogAction {
   ADD
   REMOVE
@@ -29,6 +36,8 @@ model User {
   email String @unique
   // Định danh dạng URL, duy nhất toàn hệ thống (a-z, 0-9, '-', 3–30 ký tự)
   slug String @unique
+  // Vai trò / gói. Đăng ký mới = TRIAL. Chỉ có đúng 1 SUPER_ADMIN (gán bằng script admin:promote)
+  role UserRole @default(TRIAL)
   hashedPassword String
   firstName String?
   lastName String?
@@ -180,4 +189,25 @@ model TourEntryLog {
 
   @@index([tourId, id])
   @@map("tour_entry_logs")
+}
+
+/// Giới hạn tính năng theo gói (TRIAL / STANDARD) – super admin chỉnh qua API.
+/// Giá trị số = null nghĩa là không giới hạn.
+model PlanLimit {
+  id Int @id @default(autoincrement())
+
+  plan             UserRole @unique
+  /// Số player tối đa trong danh sách player
+  maxPlayers       Int?
+  /// Số tour tối đa được tạo
+  maxTours         Int?
+  /// Số tour được chạy cùng lúc tối đa
+  maxRunningTours  Int?
+  /// Được xuất Excel danh sách player
+  canExportPlayers Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("plan_limits")
 }

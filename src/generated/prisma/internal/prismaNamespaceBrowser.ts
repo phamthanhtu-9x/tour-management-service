@@ -57,7 +57,8 @@ export const ModelName = {
   TourControl: 'TourControl',
   DefaultLevel: 'DefaultLevel',
   Player: 'Player',
-  TourEntryLog: 'TourEntryLog'
+  TourEntryLog: 'TourEntryLog',
+  PlanLimit: 'PlanLimit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -80,6 +81,7 @@ export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   slug: 'slug',
+  role: 'role',
   hashedPassword: 'hashedPassword',
   firstName: 'firstName',
   lastName: 'lastName',
@@ -186,6 +188,20 @@ export const TourEntryLogScalarFieldEnum = {
 } as const
 
 export type TourEntryLogScalarFieldEnum = (typeof TourEntryLogScalarFieldEnum)[keyof typeof TourEntryLogScalarFieldEnum]
+
+
+export const PlanLimitScalarFieldEnum = {
+  id: 'id',
+  plan: 'plan',
+  maxPlayers: 'maxPlayers',
+  maxTours: 'maxTours',
+  maxRunningTours: 'maxRunningTours',
+  canExportPlayers: 'canExportPlayers',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanLimitScalarFieldEnum = (typeof PlanLimitScalarFieldEnum)[keyof typeof PlanLimitScalarFieldEnum]
 
 
 export const SortOrder = {

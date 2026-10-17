@@ -390,7 +390,8 @@ export const ModelName = {
   TourControl: 'TourControl',
   DefaultLevel: 'DefaultLevel',
   Player: 'Player',
-  TourEntryLog: 'TourEntryLog'
+  TourEntryLog: 'TourEntryLog',
+  PlanLimit: 'PlanLimit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tour" | "tourLevel" | "tourControl" | "defaultLevel" | "player" | "tourEntryLog"
+    modelProps: "user" | "tour" | "tourLevel" | "tourControl" | "defaultLevel" | "player" | "tourEntryLog" | "planLimit"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -928,6 +929,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PlanLimit: {
+      payload: Prisma.$PlanLimitPayload<ExtArgs>
+      fields: Prisma.PlanLimitFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlanLimitFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlanLimitFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>
+        }
+        findFirst: {
+          args: Prisma.PlanLimitFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlanLimitFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>
+        }
+        findMany: {
+          args: Prisma.PlanLimitFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>[]
+        }
+        create: {
+          args: Prisma.PlanLimitCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>
+        }
+        createMany: {
+          args: Prisma.PlanLimitCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlanLimitCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>[]
+        }
+        delete: {
+          args: Prisma.PlanLimitDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>
+        }
+        update: {
+          args: Prisma.PlanLimitUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlanLimitDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlanLimitUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlanLimitUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlanLimitUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanLimitPayload>
+        }
+        aggregate: {
+          args: Prisma.PlanLimitAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlanLimit>
+        }
+        groupBy: {
+          args: Prisma.PlanLimitGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanLimitGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlanLimitCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanLimitCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -971,6 +1046,7 @@ export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   slug: 'slug',
+  role: 'role',
   hashedPassword: 'hashedPassword',
   firstName: 'firstName',
   lastName: 'lastName',
@@ -1079,6 +1155,20 @@ export const TourEntryLogScalarFieldEnum = {
 export type TourEntryLogScalarFieldEnum = (typeof TourEntryLogScalarFieldEnum)[keyof typeof TourEntryLogScalarFieldEnum]
 
 
+export const PlanLimitScalarFieldEnum = {
+  id: 'id',
+  plan: 'plan',
+  maxPlayers: 'maxPlayers',
+  maxTours: 'maxTours',
+  maxRunningTours: 'maxRunningTours',
+  canExportPlayers: 'canExportPlayers',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanLimitScalarFieldEnum = (typeof PlanLimitScalarFieldEnum)[keyof typeof PlanLimitScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1150,6 +1240,20 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'String[]'
  */
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+/**
+ * Reference to a field of type 'UserRole'
+ */
+export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
+    
+
+
+/**
+ * Reference to a field of type 'UserRole[]'
+ */
+export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole[]'>
     
 
 
@@ -1331,6 +1435,7 @@ export type GlobalOmitConfig = {
   defaultLevel?: Prisma.DefaultLevelOmit
   player?: Prisma.PlayerOmit
   tourEntryLog?: Prisma.TourEntryLogOmit
+  planLimit?: Prisma.PlanLimitOmit
 }
 
 /* Types for Logging */

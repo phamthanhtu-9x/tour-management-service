@@ -19,6 +19,7 @@ import {
 import { randomUUID } from 'crypto';
 import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PlanService } from 'src/plan/plan.service';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import { PaginatedResource } from 'src/common/interfaces/paginated-res.interface';
 import { DEFAULT_TOUR_LEVELS } from './tour.constants';
@@ -60,6 +61,7 @@ export class TourService implements OnModuleDestroy {
     private prismaService: PrismaService,
     @Inject(forwardRef(() => TourGateway))
     private tourGateway: TourGateway,
+    private planService: PlanService,
   ) {}
 
   /** Dọn sạch toàn bộ timer khi service bị huỷ (tránh leak khi shutdown/HMR). */
@@ -178,6 +180,7 @@ export class TourService implements OnModuleDestroy {
   }
 
   async insertTour(userId: number, insertTourDto: InsertTourDto) {
+    await this.planService.assertCanCreateTour(userId);
     // Lấy cấu hình level mặc định của user; nếu chưa có thì dùng bộ mặc định sẵn
     const userDefaultLevels = await this.prismaService.defaultLevel.findMany({
       where: { userId },
@@ -590,6 +593,7 @@ export class TourService implements OnModuleDestroy {
 
   async startClock(userId: number, tourId: number) {
     const { control } = await this.getOwnedControl(userId, tourId);
+    await this.planService.assertCanStartTour(userId, tourId);
     const result = await this.updateControl(control.id, {
       isPaused: false,
       isRunning: true,
