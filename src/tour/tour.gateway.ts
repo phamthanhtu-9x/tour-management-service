@@ -18,6 +18,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TourService } from './tour.service';
+import { PlanService } from '../plan/plan.service';
+import { ACCOUNT_EXPIRED_MESSAGE, isAccountExpired } from '../plan/expiry.util';
 import {
   computeUndoableIds,
   isRegistrationOpen,
@@ -146,6 +148,7 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly configService: ConfigService,
     @Inject(forwardRef(() => TourService))
     private readonly tourService: TourService,
+    private readonly planService: PlanService,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -205,9 +208,27 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Connection lifecycle
   // ---------------------------------------------------------------------------
 
-  handleConnection(client: Socket): void {
+  async handleConnection(client: Socket): Promise<void> {
     try {
       const payload = this.verifyToken(client);
+      const found = await this.prismaService.user.findUnique({
+        where: { id: payload.sub },
+        select: { id: true, role: true, planExpiresAt: true },
+      });
+      if (!found) {
+        throw new UnauthorizedException('Tài khoản không tồn tại');
+      }
+      // STANDARD hết hạn → tự hạ TRIAL (thêm downgradeDays) trước khi xét khoá
+      const user = await this.planService.resolveAccount(found);
+      // Tài khoản hết hạn → không cho kết nối WebSocket
+      if (isAccountExpired(user.role, user.planExpiresAt)) {
+        client.emit('tour-error', {
+          message: ACCOUNT_EXPIRED_MESSAGE,
+          code: 'ACCOUNT_EXPIRED',
+        });
+        client.disconnect();
+        return;
+      }
       // Lưu userId vào socket data để dùng sau
       const socketData = client.data as SocketData;
       socketData.userId = payload.sub;

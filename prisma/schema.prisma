@@ -38,6 +38,8 @@ model User {
   slug String @unique
   // Vai trò / gói. Đăng ký mới = TRIAL. Chỉ có đúng 1 SUPER_ADMIN (gán bằng script admin:promote)
   role UserRole @default(TRIAL)
+  // Hết hạn sử dụng: null = vô thời hạn. Quá hạn → khoá đăng nhập (trừ SUPER_ADMIN)
+  planExpiresAt DateTime?
   hashedPassword String
   firstName String?
   lastName String?
@@ -205,6 +207,11 @@ model PlanLimit {
   maxRunningTours  Int?
   /// Được xuất Excel danh sách player
   canExportPlayers Boolean  @default(true)
+  /// Thời hạn mặc định (ngày) gán cho user mới đăng ký gói này; null = vô thời hạn
+  durationDays     Int?
+  /// Chỉ dùng cho STANDARD: hết hạn → tự hạ xuống TRIAL thêm N ngày (tính từ lúc hết hạn).
+  /// null = khoá đăng nhập ngay khi hết hạn
+  downgradeDays    Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

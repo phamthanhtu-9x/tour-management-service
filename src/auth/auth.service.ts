@@ -5,6 +5,12 @@ import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { slugBaseFromEmail, slugCandidate } from '../user/slug.util';
+import { PlanService } from '../plan/plan.service';
+import {
+  accountExpiredError,
+  defaultExpiry,
+  isAccountExpired,
+} from '../plan/expiry.util';
 
 /** Số lần thử lại khi slug vừa sinh bị người khác lấy mất (đăng ký đồng thời). */
 const SLUG_RETRY = 3;
@@ -15,9 +21,13 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private planService: PlanService,
   ) {}
   async register(authDTO: AuthDTO) {
     const hashedPassword = await argon.hash(authDTO.password);
+    // User mới = TRIAL, nhận thời hạn mặc định của gói TRIAL
+    const { durationDays } = await this.planService.getLimitsForRole('TRIAL');
+    const planExpiresAt = defaultExpiry(durationDays);
 
     for (let attempt = 1; ; attempt++) {
       const slug = await this.generateUniqueSlug(authDTO.email);
@@ -29,6 +39,8 @@ export class AuthService {
             firstName: '',
             lastName: '',
             slug,
+            role: 'TRIAL',
+            planExpiresAt,
           },
           select: {
             id: true,
@@ -87,6 +99,15 @@ export class AuthService {
     );
     if (!passwordMatches) {
       throw new ForbiddenException('Incorrect password');
+    }
+    // Kiểm tra hạn SAU khi đúng mật khẩu (không lộ trạng thái tài khoản cho người đoán mật khẩu).
+    // STANDARD hết hạn → tự hạ TRIAL (còn hạn thêm downgradeDays) trước khi xét khoá.
+    const account = await this.planService.resolveAccount(user);
+    if (
+      account.planExpiresAt &&
+      isAccountExpired(account.role, account.planExpiresAt)
+    ) {
+      throw accountExpiredError(account.planExpiresAt);
     }
 
     return this.signJwtToken(user.id, user.email);

@@ -334,6 +334,15 @@ Server gửi khi có lỗi xảy ra.
 }
 ```
 
+Khi **tài khoản hết hạn sử dụng**, server gửi kèm `code` rồi ngắt kết nối – frontend **không** nên tự reconnect (xem `ADMIN_PERMISSIONS.md`):
+
+```json
+{
+  "message": "Tài khoản đã hết hạn sử dụng. Vui lòng liên hệ quản trị viên để gia hạn",
+  "code": "ACCOUNT_EXPIRED"
+}
+```
+
 ### 4.4. `tour-log` ⭐ Log thao tác entries
 
 Server push khi có thao tác thêm / xoá / rebuy / cập nhật entries, undo, hoặc reset clock; và gửi `snapshot` ngay sau `join-tour`.

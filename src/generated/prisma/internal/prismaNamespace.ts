@@ -1047,6 +1047,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   slug: 'slug',
   role: 'role',
+  planExpiresAt: 'planExpiresAt',
   hashedPassword: 'hashedPassword',
   firstName: 'firstName',
   lastName: 'lastName',
@@ -1162,6 +1163,8 @@ export const PlanLimitScalarFieldEnum = {
   maxTours: 'maxTours',
   maxRunningTours: 'maxRunningTours',
   canExportPlayers: 'canExportPlayers',
+  durationDays: 'durationDays',
+  downgradeDays: 'downgradeDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

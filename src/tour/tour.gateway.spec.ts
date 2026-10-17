@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { Socket, Server } from 'socket.io';
 import { TourGateway } from './tour.gateway';
 import { PrismaService } from '../prisma/prisma.service';
+import { PlanService } from '../plan/plan.service';
 
 // Lấy mock instance để config trong từng test
 const mockPrismaService = {
@@ -20,6 +21,11 @@ const mockPrismaService = {
   tourControl: { findUnique: jest.fn() },
   tourLevel: { count: jest.fn(), findMany: jest.fn() },
   tourEntryLog: { findMany: jest.fn().mockResolvedValue([]) },
+  user: {
+    findUnique: jest
+      .fn()
+      .mockResolvedValue({ role: 'STANDARD', planExpiresAt: null }),
+  },
 };
 
 const mockJwtService = {
@@ -67,6 +73,13 @@ describe('TourGateway', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: PlanService,
+          // Không hạ gói trong test gateway: trả nguyên trạng thái user
+          useValue: {
+            resolveAccount: jest.fn(<T>(user: T) => Promise.resolve(user)),
+          },
+        },
       ],
     }).compile();
 
@@ -77,10 +90,10 @@ describe('TourGateway', () => {
   });
 
   describe('handleConnection', () => {
-    it('nên xác thực và lưu userId khi token hợp lệ', () => {
+    it('nên xác thực và lưu userId khi token hợp lệ', async () => {
       mockJwtService.verify.mockReturnValue({ sub: 1, email: 'test@test.com' });
 
-      gateway.handleConnection(mockSocket);
+      await gateway.handleConnection(mockSocket);
 
       expect(mockJwtService.verify).toHaveBeenCalledWith('valid-jwt-token', {
         secret: 'test-jwt-secret',
@@ -90,13 +103,13 @@ describe('TourGateway', () => {
       expect(socketDisconnect).not.toHaveBeenCalled();
     });
 
-    it('nên disconnect khi thiếu token', () => {
+    it('nên disconnect khi thiếu token', async () => {
       const socketNoToken = {
         ...mockSocket,
         handshake: { auth: {}, query: {} },
       } as unknown as Socket;
 
-      gateway.handleConnection(socketNoToken);
+      await gateway.handleConnection(socketNoToken);
 
       expect(socketEmit).toHaveBeenCalledWith('tour-error', {
         message: 'Thiếu token xác thực',
@@ -104,17 +117,47 @@ describe('TourGateway', () => {
       expect(socketDisconnect).toHaveBeenCalled();
     });
 
-    it('nên disconnect khi token không hợp lệ', () => {
+    it('nên disconnect khi token không hợp lệ', async () => {
       mockJwtService.verify.mockImplementation(() => {
         throw new Error('Invalid token');
       });
 
-      gateway.handleConnection(mockSocket);
+      await gateway.handleConnection(mockSocket);
 
       expect(socketEmit).toHaveBeenCalledWith('tour-error', {
         message: 'Token không hợp lệ hoặc đã hết hạn',
       });
       expect(socketDisconnect).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleConnection – tài khoản hết hạn', () => {
+    it('nên từ chối kết nối khi tài khoản đã hết hạn', async () => {
+      mockJwtService.verify.mockReturnValue({ sub: 1, email: 'test@test.com' });
+      mockPrismaService.user.findUnique.mockResolvedValueOnce({
+        role: 'TRIAL',
+        planExpiresAt: new Date(Date.now() - 1000),
+      });
+
+      await gateway.handleConnection(mockSocket);
+
+      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
+        message: expect.stringContaining('hết hạn') as unknown as string,
+        code: 'ACCOUNT_EXPIRED',
+      });
+      expect(socketDisconnect).toHaveBeenCalled();
+    });
+
+    it('super admin không bao giờ hết hạn', async () => {
+      mockJwtService.verify.mockReturnValue({ sub: 1, email: 'a@a.com' });
+      mockPrismaService.user.findUnique.mockResolvedValueOnce({
+        role: 'SUPER_ADMIN',
+        planExpiresAt: new Date(Date.now() - 1000),
+      });
+
+      await gateway.handleConnection(mockSocket);
+
+      expect(socketDisconnect).not.toHaveBeenCalled();
     });
   });
 

@@ -7,6 +7,8 @@ export const UNLIMITED: PlanLimits = {
   maxTours: null,
   maxRunningTours: null,
   canExportPlayers: true,
+  durationDays: null,
+  downgradeDays: null,
 };
 
 /** Mặc định dự phòng nếu bảng plan_limits thiếu dòng (khớp migration). */
@@ -16,8 +18,10 @@ export const DEFAULT_LIMITS: Record<Plan, PlanLimits> = {
     maxTours: 3,
     maxRunningTours: 1,
     canExportPlayers: false,
+    durationDays: 14,
+    downgradeDays: null,
   },
-  STANDARD: UNLIMITED,
+  STANDARD: { ...UNLIMITED, downgradeDays: 5 },
 };
 
 export const ROLE_LABEL: Record<Role, string> = {

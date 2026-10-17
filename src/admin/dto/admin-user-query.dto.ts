@@ -1,6 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 
 export class AdminUserQueryDto extends PaginationQueryDto {
@@ -26,4 +34,26 @@ export class AdminUserQueryDto extends PaginationQueryDto {
   @IsIn(['SUPER_ADMIN', 'TRIAL', 'STANDARD'])
   @IsOptional()
   role?: 'SUPER_ADMIN' | 'TRIAL' | 'STANDARD';
+
+  @ApiPropertyOptional({
+    description:
+      'Lọc theo trạng thái thời hạn: active (còn dùng được) / expired (đã hết hạn)',
+    enum: ['active', 'expired'],
+  })
+  @IsIn(['active', 'expired'])
+  @IsOptional()
+  status?: 'active' | 'expired';
+
+  @ApiPropertyOptional({
+    description: 'Chỉ lấy user còn hạn và sẽ hết hạn trong N ngày tới',
+    minimum: 1,
+    maximum: 365,
+    example: 7,
+  })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(365)
+  @IsOptional()
+  expiringInDays?: number;
 }

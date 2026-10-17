@@ -22,7 +22,12 @@ import { Roles } from '../auth/decorator';
 import { PlanService } from 'src/plan/plan.service';
 import type { Plan } from 'src/plan/plan.types';
 import { AdminService } from './admin.service';
-import { AdminUserQueryDto, UpdatePlanDto, UpdateUserRoleDto } from './dto';
+import {
+  AdminUserQueryDto,
+  UpdatePlanDto,
+  UpdateSubscriptionDto,
+  UpdateUserRoleDto,
+} from './dto';
 
 /** Chỉ SUPER_ADMIN được dùng các API trong controller này. */
 @ApiTags('Admin')
@@ -64,6 +69,26 @@ export class AdminController {
     return this.adminService.updateUserRole(userId, dto.role);
   }
 
+  @ApiOperation({
+    summary:
+      'Đổi gói và/hoặc thời hạn của user (role, expiresAt, extendDays – gửi trường nào đổi trường đó)',
+  })
+  @ApiResponse({ status: 200, description: 'Cập nhật thành công.' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Không gửi trường nào, gửi cả expiresAt và extendDays, hoặc gia hạn tài khoản vô thời hạn.',
+  })
+  @ApiResponse({ status: 403, description: 'User đích là super admin.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy user.' })
+  @Patch('users/:id/subscription')
+  updateSubscription(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() dto: UpdateSubscriptionDto,
+  ) {
+    return this.adminService.updateSubscription(userId, dto);
+  }
+
   @ApiOperation({ summary: 'Xem giới hạn của các gói (TRIAL, STANDARD)' })
   @ApiResponse({ status: 200, description: 'Lấy cấu hình thành công.' })
   @Get('plans')
@@ -85,6 +110,8 @@ export class AdminController {
       maxTours: dto.maxTours,
       maxRunningTours: dto.maxRunningTours,
       canExportPlayers: dto.canExportPlayers,
+      durationDays: dto.durationDays,
+      downgradeDays: dto.downgradeDays,
     });
   }
 }

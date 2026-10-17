@@ -32,6 +32,8 @@ export type PlanLimitAvgAggregateOutputType = {
   maxPlayers: number | null
   maxTours: number | null
   maxRunningTours: number | null
+  durationDays: number | null
+  downgradeDays: number | null
 }
 
 export type PlanLimitSumAggregateOutputType = {
@@ -39,6 +41,8 @@ export type PlanLimitSumAggregateOutputType = {
   maxPlayers: number | null
   maxTours: number | null
   maxRunningTours: number | null
+  durationDays: number | null
+  downgradeDays: number | null
 }
 
 export type PlanLimitMinAggregateOutputType = {
@@ -48,6 +52,8 @@ export type PlanLimitMinAggregateOutputType = {
   maxTours: number | null
   maxRunningTours: number | null
   canExportPlayers: boolean | null
+  durationDays: number | null
+  downgradeDays: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,6 +65,8 @@ export type PlanLimitMaxAggregateOutputType = {
   maxTours: number | null
   maxRunningTours: number | null
   canExportPlayers: boolean | null
+  durationDays: number | null
+  downgradeDays: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +78,8 @@ export type PlanLimitCountAggregateOutputType = {
   maxTours: number
   maxRunningTours: number
   canExportPlayers: number
+  durationDays: number
+  downgradeDays: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -81,6 +91,8 @@ export type PlanLimitAvgAggregateInputType = {
   maxPlayers?: true
   maxTours?: true
   maxRunningTours?: true
+  durationDays?: true
+  downgradeDays?: true
 }
 
 export type PlanLimitSumAggregateInputType = {
@@ -88,6 +100,8 @@ export type PlanLimitSumAggregateInputType = {
   maxPlayers?: true
   maxTours?: true
   maxRunningTours?: true
+  durationDays?: true
+  downgradeDays?: true
 }
 
 export type PlanLimitMinAggregateInputType = {
@@ -97,6 +111,8 @@ export type PlanLimitMinAggregateInputType = {
   maxTours?: true
   maxRunningTours?: true
   canExportPlayers?: true
+  durationDays?: true
+  downgradeDays?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -108,6 +124,8 @@ export type PlanLimitMaxAggregateInputType = {
   maxTours?: true
   maxRunningTours?: true
   canExportPlayers?: true
+  durationDays?: true
+  downgradeDays?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -119,6 +137,8 @@ export type PlanLimitCountAggregateInputType = {
   maxTours?: true
   maxRunningTours?: true
   canExportPlayers?: true
+  durationDays?: true
+  downgradeDays?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -217,6 +237,8 @@ export type PlanLimitGroupByOutputType = {
   maxTours: number | null
   maxRunningTours: number | null
   canExportPlayers: boolean
+  durationDays: number | null
+  downgradeDays: number | null
   createdAt: Date
   updatedAt: Date
   _count: PlanLimitCountAggregateOutputType | null
@@ -251,6 +273,8 @@ export type PlanLimitWhereInput = {
   maxTours?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
   maxRunningTours?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
   canExportPlayers?: Prisma.BoolFilter<"PlanLimit"> | boolean
+  durationDays?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
+  downgradeDays?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
   createdAt?: Prisma.DateTimeFilter<"PlanLimit"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PlanLimit"> | Date | string
 }
@@ -262,6 +286,8 @@ export type PlanLimitOrderByWithRelationInput = {
   maxTours?: Prisma.SortOrderInput | Prisma.SortOrder
   maxRunningTours?: Prisma.SortOrderInput | Prisma.SortOrder
   canExportPlayers?: Prisma.SortOrder
+  durationDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  downgradeDays?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -276,6 +302,8 @@ export type PlanLimitWhereUniqueInput = Prisma.AtLeast<{
   maxTours?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
   maxRunningTours?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
   canExportPlayers?: Prisma.BoolFilter<"PlanLimit"> | boolean
+  durationDays?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
+  downgradeDays?: Prisma.IntNullableFilter<"PlanLimit"> | number | null
   createdAt?: Prisma.DateTimeFilter<"PlanLimit"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PlanLimit"> | Date | string
 }, "id" | "plan">
@@ -287,6 +315,8 @@ export type PlanLimitOrderByWithAggregationInput = {
   maxTours?: Prisma.SortOrderInput | Prisma.SortOrder
   maxRunningTours?: Prisma.SortOrderInput | Prisma.SortOrder
   canExportPlayers?: Prisma.SortOrder
+  durationDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  downgradeDays?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PlanLimitCountOrderByAggregateInput
@@ -306,6 +336,8 @@ export type PlanLimitScalarWhereWithAggregatesInput = {
   maxTours?: Prisma.IntNullableWithAggregatesFilter<"PlanLimit"> | number | null
   maxRunningTours?: Prisma.IntNullableWithAggregatesFilter<"PlanLimit"> | number | null
   canExportPlayers?: Prisma.BoolWithAggregatesFilter<"PlanLimit"> | boolean
+  durationDays?: Prisma.IntNullableWithAggregatesFilter<"PlanLimit"> | number | null
+  downgradeDays?: Prisma.IntNullableWithAggregatesFilter<"PlanLimit"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PlanLimit"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PlanLimit"> | Date | string
 }
@@ -316,6 +348,8 @@ export type PlanLimitCreateInput = {
   maxTours?: number | null
   maxRunningTours?: number | null
   canExportPlayers?: boolean
+  durationDays?: number | null
+  downgradeDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -327,6 +361,8 @@ export type PlanLimitUncheckedCreateInput = {
   maxTours?: number | null
   maxRunningTours?: number | null
   canExportPlayers?: boolean
+  durationDays?: number | null
+  downgradeDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -337,6 +373,8 @@ export type PlanLimitUpdateInput = {
   maxTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxRunningTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canExportPlayers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  durationDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  downgradeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -348,6 +386,8 @@ export type PlanLimitUncheckedUpdateInput = {
   maxTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxRunningTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canExportPlayers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  durationDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  downgradeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -359,6 +399,8 @@ export type PlanLimitCreateManyInput = {
   maxTours?: number | null
   maxRunningTours?: number | null
   canExportPlayers?: boolean
+  durationDays?: number | null
+  downgradeDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -369,6 +411,8 @@ export type PlanLimitUpdateManyMutationInput = {
   maxTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxRunningTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canExportPlayers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  durationDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  downgradeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -380,6 +424,8 @@ export type PlanLimitUncheckedUpdateManyInput = {
   maxTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxRunningTours?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canExportPlayers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  durationDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  downgradeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -391,6 +437,8 @@ export type PlanLimitCountOrderByAggregateInput = {
   maxTours?: Prisma.SortOrder
   maxRunningTours?: Prisma.SortOrder
   canExportPlayers?: Prisma.SortOrder
+  durationDays?: Prisma.SortOrder
+  downgradeDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -400,6 +448,8 @@ export type PlanLimitAvgOrderByAggregateInput = {
   maxPlayers?: Prisma.SortOrder
   maxTours?: Prisma.SortOrder
   maxRunningTours?: Prisma.SortOrder
+  durationDays?: Prisma.SortOrder
+  downgradeDays?: Prisma.SortOrder
 }
 
 export type PlanLimitMaxOrderByAggregateInput = {
@@ -409,6 +459,8 @@ export type PlanLimitMaxOrderByAggregateInput = {
   maxTours?: Prisma.SortOrder
   maxRunningTours?: Prisma.SortOrder
   canExportPlayers?: Prisma.SortOrder
+  durationDays?: Prisma.SortOrder
+  downgradeDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -420,6 +472,8 @@ export type PlanLimitMinOrderByAggregateInput = {
   maxTours?: Prisma.SortOrder
   maxRunningTours?: Prisma.SortOrder
   canExportPlayers?: Prisma.SortOrder
+  durationDays?: Prisma.SortOrder
+  downgradeDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -429,6 +483,8 @@ export type PlanLimitSumOrderByAggregateInput = {
   maxPlayers?: Prisma.SortOrder
   maxTours?: Prisma.SortOrder
   maxRunningTours?: Prisma.SortOrder
+  durationDays?: Prisma.SortOrder
+  downgradeDays?: Prisma.SortOrder
 }
 
 
@@ -440,6 +496,8 @@ export type PlanLimitSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   maxTours?: boolean
   maxRunningTours?: boolean
   canExportPlayers?: boolean
+  durationDays?: boolean
+  downgradeDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["planLimit"]>
@@ -451,6 +509,8 @@ export type PlanLimitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   maxTours?: boolean
   maxRunningTours?: boolean
   canExportPlayers?: boolean
+  durationDays?: boolean
+  downgradeDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["planLimit"]>
@@ -462,6 +522,8 @@ export type PlanLimitSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   maxTours?: boolean
   maxRunningTours?: boolean
   canExportPlayers?: boolean
+  durationDays?: boolean
+  downgradeDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["planLimit"]>
@@ -473,11 +535,13 @@ export type PlanLimitSelectScalar = {
   maxTours?: boolean
   maxRunningTours?: boolean
   canExportPlayers?: boolean
+  durationDays?: boolean
+  downgradeDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanLimitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "plan" | "maxPlayers" | "maxTours" | "maxRunningTours" | "canExportPlayers" | "createdAt" | "updatedAt", ExtArgs["result"]["planLimit"]>
+export type PlanLimitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "plan" | "maxPlayers" | "maxTours" | "maxRunningTours" | "canExportPlayers" | "durationDays" | "downgradeDays" | "createdAt" | "updatedAt", ExtArgs["result"]["planLimit"]>
 
 export type $PlanLimitPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PlanLimit"
@@ -501,6 +565,15 @@ export type $PlanLimitPayload<ExtArgs extends runtime.Types.Extensions.InternalA
      * Được xuất Excel danh sách player
      */
     canExportPlayers: boolean
+    /**
+     * Thời hạn mặc định (ngày) gán cho user mới đăng ký gói này; null = vô thời hạn
+     */
+    durationDays: number | null
+    /**
+     * Chỉ dùng cho STANDARD: hết hạn → tự hạ xuống TRIAL thêm N ngày (tính từ lúc hết hạn).
+     * null = khoá đăng nhập ngay khi hết hạn
+     */
+    downgradeDays: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["planLimit"]>
@@ -932,6 +1005,8 @@ export interface PlanLimitFieldRefs {
   readonly maxTours: Prisma.FieldRef<"PlanLimit", 'Int'>
   readonly maxRunningTours: Prisma.FieldRef<"PlanLimit", 'Int'>
   readonly canExportPlayers: Prisma.FieldRef<"PlanLimit", 'Boolean'>
+  readonly durationDays: Prisma.FieldRef<"PlanLimit", 'Int'>
+  readonly downgradeDays: Prisma.FieldRef<"PlanLimit", 'Int'>
   readonly createdAt: Prisma.FieldRef<"PlanLimit", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PlanLimit", 'DateTime'>
 }
