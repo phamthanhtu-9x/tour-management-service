@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UploadModule } from './upload/upload.module';
 import { SetupModule } from './setup/setup.module';
 import { PlayerModule } from './player/player.module';
+import { PublicModule } from './public/public.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -18,6 +20,8 @@ import { ConfigModule } from '@nestjs/config';
     UploadModule,
     SetupModule,
     PlayerModule,
+    PublicModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}

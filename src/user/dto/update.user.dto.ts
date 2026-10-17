@@ -1,5 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsNotIn, IsOptional, IsString, Matches } from 'class-validator';
+import { RESERVED_SLUGS, SLUG_FORMAT_MESSAGE, SLUG_REGEX } from '../slug.util';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
@@ -33,4 +35,20 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   lastName?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "Slug (định danh dạng URL) – duy nhất toàn hệ thống. Chỉ a-z, 0-9, '-', dài 3–30, không bắt đầu/kết thúc bằng '-'. Chữ hoa được tự chuyển thành chữ thường",
+    example: 'pham-tu',
+  })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  @IsString()
+  @Matches(SLUG_REGEX, { message: SLUG_FORMAT_MESSAGE })
+  @IsNotIn(RESERVED_SLUGS, {
+    message: 'Slug này là từ dành riêng, hãy chọn slug khác',
+  })
+  @IsOptional()
+  slug?: string;
 }

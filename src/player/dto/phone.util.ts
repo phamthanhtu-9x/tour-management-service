@@ -31,3 +31,19 @@ export function toPhoneSearch(term: string): string | null {
   if (!/^\+?\d+$/.test(phone)) return null;
   return phone.replace('+', '').length >= 3 ? phone : null;
 }
+
+/**
+ * Từ khoá → số điện thoại đầy đủ (đã chuẩn hoá) để so khớp CHÍNH XÁC.
+ * Trả null nếu từ khoá không phải một số điện thoại hợp lệ đầy đủ.
+ */
+export function toExactPhone(term: string): string | null {
+  const phone = canonicalPhone(term);
+  return PHONE_REGEX.test(phone) ? phone : null;
+}
+
+/** Che số điện thoại: giữ 4 ký tự đầu và 3 ký tự cuối, ví dụ 0912***678. */
+export function maskPhone(phone: string | null): string | null {
+  if (!phone) return null;
+  if (phone.length <= 7) return '***';
+  return `${phone.slice(0, 4)}***${phone.slice(-3)}`;
+}

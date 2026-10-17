@@ -7,6 +7,7 @@ import {
 import { InsertPlayerDto, SearchPlayerQueryDto, UpdatePlayerDto } from './dto';
 import { toPhoneSearch } from './dto/phone.util';
 import { toSearchText } from './player.search';
+import { buildPlayersWorkbook } from './player.export';
 import { Prisma } from 'src/generated/prisma/client';
 
 /** Cột nội bộ, không trả cho client. */
@@ -49,6 +50,19 @@ export class PlayerService {
         currentPage: page,
       },
     };
+  }
+
+  /**
+   * Xuất file Excel danh sách player (Tên, Số điện thoại, Điểm).
+   * Lọc theo `search` giống danh sách, cùng thứ tự (mới tạo trước), không phân trang.
+   */
+  async exportPlayers(userId: number, search?: string): Promise<Buffer> {
+    const players = await this.prismaService.player.findMany({
+      where: this.buildSearchWhere(userId, search),
+      orderBy: { createdAt: 'desc' },
+      select: { name: true, phone: true, point: true },
+    });
+    return buildPlayersWorkbook(players);
   }
 
   /**

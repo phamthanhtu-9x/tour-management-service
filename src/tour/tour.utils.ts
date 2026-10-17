@@ -182,3 +182,22 @@ export function applyInverse(
       throw new BadRequestException('Thao tác này không hỗ trợ hoàn tác');
   }
 }
+
+/**
+ * Số giây đã trôi trong level hiện tại, tính bằng server clock
+ * (cùng công thức với TourService / TourGateway).
+ */
+export function calcElapsedSeconds(
+  control: {
+    isPaused: boolean;
+    pausedAtSecond: number;
+    levelStartedAt: Date | null;
+  },
+  now: number = Date.now(),
+): number {
+  if (control.isPaused || !control.levelStartedAt) {
+    return control.pausedAtSecond;
+  }
+  const diff = Math.floor((now - control.levelStartedAt.getTime()) / 1000);
+  return control.pausedAtSecond + Math.max(0, diff);
+}

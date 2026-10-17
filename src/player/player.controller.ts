@@ -8,18 +8,35 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiProduces,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { MyJwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
 import { PlayerService } from './player.service';
-import { InsertPlayerDto, SearchPlayerQueryDto, UpdatePlayerDto } from './dto';
+import {
+  ExportPlayerQueryDto,
+  InsertPlayerDto,
+  SearchPlayerQueryDto,
+  UpdatePlayerDto,
+} from './dto';
+
+const XLSX_MIME =
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+/** Ngày hiện tại theo giờ Việt Nam, dạng YYYY-MM-DD (dùng cho tên file). */
+const todayVN = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(
+    new Date(),
+  );
 
 @ApiTags('Players')
 @ApiBearerAuth()
@@ -40,6 +57,36 @@ export class PlayerController {
     @Query() query: SearchPlayerQueryDto,
   ) {
     return this.playerService.getPlayers(userId, query);
+  }
+
+  // LƯU Ý: phải khai báo TRƯỚC route ':id' để 'export' không bị hiểu là id
+  @ApiOperation({
+    summary:
+      'Xuất file Excel danh sách người chơi (Tên, Số điện thoại, Điểm) – lọc theo `search` nếu có',
+  })
+  @ApiProduces(XLSX_MIME)
+  @ApiResponse({
+    status: 200,
+    description: 'File .xlsx',
+    content: { [XLSX_MIME]: { schema: { type: 'string', format: 'binary' } } },
+  })
+  @ApiResponse({ status: 401, description: 'Chưa xác thực (Unauthorized).' })
+  @Get('export')
+  async exportPlayers(
+    @GetUser('id') userId: number,
+    @Query() query: ExportPlayerQueryDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const buffer = await this.playerService.exportPlayers(userId, query.search);
+    const filename = `danh-sach-player-${todayVN()}.xlsx`;
+    res.set({
+      'Content-Type': XLSX_MIME,
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': String(buffer.length),
+      // Cho phép frontend (khác origin) đọc tên file từ header
+      'Access-Control-Expose-Headers': 'Content-Disposition',
+    });
+    res.send(buffer);
   }
 
   @ApiOperation({ summary: 'Lấy thông tin một người chơi' })

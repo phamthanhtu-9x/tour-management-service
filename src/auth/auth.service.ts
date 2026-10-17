@@ -4,6 +4,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { slugBaseFromEmail, slugCandidate } from '../user/slug.util';
+
+/** Số lần thử lại khi slug vừa sinh bị người khác lấy mất (đăng ký đồng thời). */
+const SLUG_RETRY = 3;
 
 @Injectable()
 export class AuthService {
@@ -14,26 +18,57 @@ export class AuthService {
   ) {}
   async register(authDTO: AuthDTO) {
     const hashedPassword = await argon.hash(authDTO.password);
-    try {
-      const user = await this.prismaService.user.create({
-        data: {
-          email: authDTO.email,
-          hashedPassword: hashedPassword,
-          firstName: '',
-          lastName: '',
-        },
-        select: {
-          id: true,
-          email: true,
-          createdAt: true,
-        },
-      });
-      return this.signJwtToken(user.id, user.email);
-    } catch (error) {
-      if (error instanceof Error && 'code' in error && error.code === 'P2002') {
-        throw new ForbiddenException('Email already exists');
+
+    for (let attempt = 1; ; attempt++) {
+      const slug = await this.generateUniqueSlug(authDTO.email);
+      try {
+        const user = await this.prismaService.user.create({
+          data: {
+            email: authDTO.email,
+            hashedPassword: hashedPassword,
+            firstName: '',
+            lastName: '',
+            slug,
+          },
+          select: {
+            id: true,
+            email: true,
+            createdAt: true,
+          },
+        });
+        return this.signJwtToken(user.id, user.email);
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          'code' in error &&
+          error.code === 'P2002'
+        ) {
+          const emailTaken = await this.prismaService.user.findUnique({
+            where: { email: authDTO.email },
+            select: { id: true },
+          });
+          if (emailTaken) {
+            throw new ForbiddenException('Email already exists');
+          }
+          // Slug vừa bị người đăng ký đồng thời lấy mất → sinh lại
+          if (attempt < SLUG_RETRY) continue;
+        }
+        throw error;
       }
-      throw error;
+    }
+  }
+
+  /** Sinh slug chưa ai dùng từ email: base, base-2, base-3, ... */
+  private async generateUniqueSlug(email: string): Promise<string> {
+    const base = slugBaseFromEmail(email);
+    const taken = await this.prismaService.user.findMany({
+      where: { slug: { startsWith: base } },
+      select: { slug: true },
+    });
+    const used = new Set(taken.map((u) => u.slug));
+    for (let n = 1; ; n++) {
+      const candidate = slugCandidate(base, n);
+      if (!used.has(candidate)) return candidate;
     }
   }
 

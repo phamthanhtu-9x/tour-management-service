@@ -27,6 +27,8 @@ enum EntryLogAction {
 model User {
   id Int @id @default(autoincrement())
   email String @unique
+  // Định danh dạng URL, duy nhất toàn hệ thống (a-z, 0-9, '-', 3–30 ký tự)
+  slug String @unique
   hashedPassword String
   firstName String?
   lastName String?
