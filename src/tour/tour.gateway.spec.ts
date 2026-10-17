@@ -89,75 +89,89 @@ describe('TourGateway', () => {
     jest.clearAllMocks();
   });
 
-  describe('handleConnection', () => {
-    it('nên xác thực và lưu userId khi token hợp lệ', async () => {
+  describe('middleware xác thực (afterInit)', () => {
+    type Middleware = (socket: Socket, next: (err?: Error) => void) => void;
+
+    /** Lấy middleware gateway đăng ký vào namespace và chạy cho 1 socket. */
+    const runMiddleware = async (
+      socket: Socket,
+    ): Promise<(Error & { data?: { code: string } }) | undefined> => {
+      let middleware: Middleware | undefined;
+      const fakeServer = {
+        use: (fn: Middleware) => {
+          middleware = fn;
+        },
+      } as unknown as Server;
+      gateway.afterInit(fakeServer);
+      return new Promise((resolve) => {
+        middleware!(socket, (err?: Error) =>
+          resolve(err as (Error & { data?: { code: string } }) | undefined),
+        );
+      });
+    };
+
+    it('token hợp lệ → cho kết nối và lưu userId trước khi connect', async () => {
       mockJwtService.verify.mockReturnValue({ sub: 1, email: 'test@test.com' });
 
-      await gateway.handleConnection(mockSocket);
+      const err = await runMiddleware(mockSocket);
 
+      expect(err).toBeUndefined();
       expect(mockJwtService.verify).toHaveBeenCalledWith('valid-jwt-token', {
         secret: 'test-jwt-secret',
       });
       expect(socketData.userId).toBe(1);
       expect(socketData.email).toBe('test@test.com');
-      expect(socketDisconnect).not.toHaveBeenCalled();
     });
 
-    it('nên disconnect khi thiếu token', async () => {
+    it('thiếu token → connect_error UNAUTHORIZED', async () => {
       const socketNoToken = {
         ...mockSocket,
+        data: {},
         handshake: { auth: {}, query: {} },
       } as unknown as Socket;
 
-      await gateway.handleConnection(socketNoToken);
+      const err = await runMiddleware(socketNoToken);
 
-      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
-        message: 'Thiếu token xác thực',
-      });
-      expect(socketDisconnect).toHaveBeenCalled();
+      expect(err?.message).toBe('Thiếu token xác thực');
+      expect(err?.data).toEqual({ code: 'UNAUTHORIZED' });
     });
 
-    it('nên disconnect khi token không hợp lệ', async () => {
+    it('token không hợp lệ → connect_error UNAUTHORIZED', async () => {
       mockJwtService.verify.mockImplementation(() => {
         throw new Error('Invalid token');
       });
 
-      await gateway.handleConnection(mockSocket);
+      const err = await runMiddleware(mockSocket);
 
-      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
-        message: 'Token không hợp lệ hoặc đã hết hạn',
-      });
-      expect(socketDisconnect).toHaveBeenCalled();
+      expect(err?.message).toBe('Token không hợp lệ hoặc đã hết hạn');
+      expect(err?.data).toEqual({ code: 'UNAUTHORIZED' });
     });
-  });
 
-  describe('handleConnection – tài khoản hết hạn', () => {
-    it('nên từ chối kết nối khi tài khoản đã hết hạn', async () => {
+    it('tài khoản hết hạn → connect_error ACCOUNT_EXPIRED', async () => {
       mockJwtService.verify.mockReturnValue({ sub: 1, email: 'test@test.com' });
       mockPrismaService.user.findUnique.mockResolvedValueOnce({
+        id: 1,
         role: 'TRIAL',
         planExpiresAt: new Date(Date.now() - 1000),
       });
 
-      await gateway.handleConnection(mockSocket);
+      const err = await runMiddleware(mockSocket);
 
-      expect(socketEmit).toHaveBeenCalledWith('tour-error', {
-        message: expect.stringContaining('hết hạn') as unknown as string,
-        code: 'ACCOUNT_EXPIRED',
-      });
-      expect(socketDisconnect).toHaveBeenCalled();
+      expect(err?.message).toContain('hết hạn');
+      expect(err?.data).toEqual({ code: 'ACCOUNT_EXPIRED' });
     });
 
     it('super admin không bao giờ hết hạn', async () => {
       mockJwtService.verify.mockReturnValue({ sub: 1, email: 'a@a.com' });
       mockPrismaService.user.findUnique.mockResolvedValueOnce({
+        id: 1,
         role: 'SUPER_ADMIN',
         planExpiresAt: new Date(Date.now() - 1000),
       });
 
-      await gateway.handleConnection(mockSocket);
+      const err = await runMiddleware(mockSocket);
 
-      expect(socketDisconnect).not.toHaveBeenCalled();
+      expect(err).toBeUndefined();
     });
   });
 

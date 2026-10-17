@@ -2,12 +2,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
-  OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Namespace, Server, Socket } from 'socket.io';
 import {
   Inject,
   Injectable,
@@ -130,6 +130,27 @@ export interface TourLevelsPayload {
   levels: TourLevelData[];
 }
 
+/** Mã lỗi gửi kèm `connect_error` (err.data.code) khi xác thực WebSocket thất bại. */
+export type SocketAuthErrorCode = 'UNAUTHORIZED' | 'ACCOUNT_EXPIRED';
+
+/** Lỗi xác thực WebSocket – Socket.IO gửi `message` và `data` cho client qua `connect_error`. */
+export class SocketAuthError extends Error {
+  readonly data: { code: SocketAuthErrorCode };
+  constructor(message: string, code: SocketAuthErrorCode) {
+    super(message);
+    this.data = { code };
+  }
+}
+
+/** Chuẩn hoá mọi lỗi xác thực thành SocketAuthError (mặc định UNAUTHORIZED). */
+function toConnectError(err: unknown): SocketAuthError {
+  if (err instanceof SocketAuthError) return err;
+  return new SocketAuthError(
+    err instanceof Error ? err.message : 'Xác thực thất bại',
+    'UNAUTHORIZED',
+  );
+}
+
 @Injectable()
 @WebSocketGateway({
   namespace: '/tour',
@@ -138,7 +159,7 @@ export interface TourLevelsPayload {
     credentials: true,
   },
 })
-export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class TourGateway implements OnGatewayInit, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -208,37 +229,42 @@ export class TourGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Connection lifecycle
   // ---------------------------------------------------------------------------
 
-  async handleConnection(client: Socket): Promise<void> {
-    try {
-      const payload = this.verifyToken(client);
-      const found = await this.prismaService.user.findUnique({
-        where: { id: payload.sub },
-        select: { id: true, role: true, planExpiresAt: true },
-      });
-      if (!found) {
-        throw new UnauthorizedException('Tài khoản không tồn tại');
-      }
-      // STANDARD hết hạn → tự hạ TRIAL (thêm downgradeDays) trước khi xét khoá
-      const user = await this.planService.resolveAccount(found);
-      // Tài khoản hết hạn → không cho kết nối WebSocket
-      if (isAccountExpired(user.role, user.planExpiresAt)) {
-        client.emit('tour-error', {
-          message: ACCOUNT_EXPIRED_MESSAGE,
-          code: 'ACCOUNT_EXPIRED',
-        });
-        client.disconnect();
-        return;
-      }
-      // Lưu userId vào socket data để dùng sau
-      const socketData = client.data as SocketData;
-      socketData.userId = payload.sub;
-      socketData.email = payload.email;
-    } catch (err) {
-      client.emit('tour-error', {
-        message: err instanceof Error ? err.message : 'Xác thực thất bại',
-      });
-      client.disconnect();
+  /**
+   * Đăng ký middleware xác thực cho namespace /tour.
+   * Middleware chạy TRƯỚC khi kết nối được chấp nhận → client chỉ nhận `connect`
+   * khi đã xác thực xong (socket.data.userId đã có), nên `join-tour` gửi ngay sau
+   * `connect` luôn hợp lệ. Lỗi xác thực → client nhận `connect_error`
+   * (err.message, err.data.code) và Socket.IO client không tự reconnect.
+   */
+  afterInit(server: Server | Namespace): void {
+    server.use((socket, next) => {
+      this.authenticate(socket)
+        .then(() => next())
+        .catch((err: unknown) => next(toConnectError(err)));
+    });
+  }
+
+  /**
+   * Xác thực socket: verify JWT → nạp user → hạ gói STANDARD hết hạn (nếu có)
+   * → chặn tài khoản hết hạn → lưu userId vào socket.data.
+   */
+  async authenticate(client: Socket): Promise<void> {
+    const payload = this.verifyToken(client);
+    const found = await this.prismaService.user.findUnique({
+      where: { id: payload.sub },
+      select: { id: true, role: true, planExpiresAt: true },
+    });
+    if (!found) {
+      throw new UnauthorizedException('Tài khoản không tồn tại');
     }
+    // STANDARD hết hạn → tự hạ TRIAL (thêm downgradeDays) trước khi xét khoá
+    const user = await this.planService.resolveAccount(found);
+    if (isAccountExpired(user.role, user.planExpiresAt)) {
+      throw new SocketAuthError(ACCOUNT_EXPIRED_MESSAGE, 'ACCOUNT_EXPIRED');
+    }
+    const socketData = client.data as SocketData;
+    socketData.userId = payload.sub;
+    socketData.email = payload.email;
   }
 
   handleDisconnect(): void {

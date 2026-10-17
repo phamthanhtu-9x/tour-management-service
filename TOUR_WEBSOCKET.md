@@ -41,7 +41,21 @@ const socket: Socket = io('http://localhost:3002/tour', {
 });
 ```
 
-> **Quan trọng:** Token JWT phải được gửi trong `auth.token` khi tạo kết nối. Nếu token hết hạn hoặc không hợp lệ, server sẽ tự động disconnect và gửi event `tour-error`.
+> **Quan trọng:** Token JWT phải được gửi trong `auth.token` khi tạo kết nối.
+>
+> Server **xác thực ngay trong lúc bắt tay (middleware)**: client **chỉ nhận `connect` khi đã xác thực xong**, nên có thể emit `join-tour` ngay trong handler `connect`.
+>
+> Nếu xác thực thất bại, client **không** nhận `connect` mà nhận event **`connect_error`**:
+>
+> ```typescript
+> socket.on('connect_error', (err: Error & { data?: { code: 'UNAUTHORIZED' | 'ACCOUNT_EXPIRED' } }) => {
+>   // err.message: "Thiếu token xác thực" | "Token không hợp lệ hoặc đã hết hạn"
+>   //              | "Tài khoản không tồn tại" | "Tài khoản đã hết hạn sử dụng. …"
+>   // err.data?.code: 'UNAUTHORIZED' | 'ACCOUNT_EXPIRED'
+> });
+> ```
+>
+> Khi server từ chối như vậy, Socket.IO client **không tự reconnect** (xem mục 8).
 
 ### 2.3. React hook ví dụ
 
@@ -77,8 +91,18 @@ export function useTourSocket(tourId: number, token: string) {
       setTourLevels(payload);
     });
 
+    // Lỗi sau khi đã kết nối (vd không có quyền với tour, tour không tồn tại)
     s.on('tour-error', (err: { message: string }) => {
       setError(err.message);
+    });
+
+    // Lỗi xác thực khi kết nối (token sai / hết hạn token / tài khoản hết hạn)
+    s.on('connect_error', (err: Error & { data?: { code?: string } }) => {
+      setConnected(false);
+      setError(err.message);
+      if (err.data?.code === 'ACCOUNT_EXPIRED') {
+        // Tài khoản hết hạn: không kết nối lại, chuyển màn hình "Tài khoản đã hết hạn"
+      }
     });
 
     s.on('disconnect', () => {
@@ -326,22 +350,15 @@ interface TourLevelData {
 
 ### 4.3. `tour-error`
 
-Server gửi khi có lỗi xảy ra.
+Server gửi khi có lỗi xảy ra **sau khi đã kết nối** (vd khi `join-tour`):
 
 ```json
 {
-  "message": "Token không hợp lệ hoặc đã hết hạn"
+  "message": "Bạn không có quyền truy cập tour này"
 }
 ```
 
-Khi **tài khoản hết hạn sử dụng**, server gửi kèm `code` rồi ngắt kết nối – frontend **không** nên tự reconnect (xem `ADMIN_PERMISSIONS.md`):
-
-```json
-{
-  "message": "Tài khoản đã hết hạn sử dụng. Vui lòng liên hệ quản trị viên để gia hạn",
-  "code": "ACCOUNT_EXPIRED"
-}
-```
+> Lỗi **xác thực** (thiếu/sai token, tài khoản hết hạn) **không** đi qua `tour-error` nữa mà qua `connect_error` – xem mục 2.2 và 8.
 
 ### 4.4. `tour-log` ⭐ Log thao tác entries
 
@@ -491,20 +508,32 @@ Tất cả REST endpoints vẫn hoạt động như cũ.
 
 ### 8.1. Các trường hợp lỗi
 
-| Lỗi | Event | Xử lý |
-|-----|-------|-------|
-| Thiếu token | `tour-error` + disconnect | Hiển thị "Vui lòng đăng nhập" |
-| Token hết hạn | `tour-error` + disconnect | Refresh token, reconnect |
-| Không có quyền truy cập tour | `tour-error` | Hiển thị "Bạn không có quyền xem tour này" |
-| Tour không tồn tại | `tour-error` | Hiển thị "Tour không tồn tại" |
-| Mất kết nối mạng | `disconnect` | Socket.IO tự reconnect, gửi lại `join-tour` |
+| Lỗi | Event | `err.data.code` | Xử lý |
+|-----|-------|-----------------|-------|
+| Thiếu token | `connect_error` | `UNAUTHORIZED` | Hiển thị "Vui lòng đăng nhập" |
+| Token sai / hết hạn token | `connect_error` | `UNAUTHORIZED` | Refresh token rồi kết nối lại thủ công (xem 8.2) |
+| Tài khoản không tồn tại | `connect_error` | `UNAUTHORIZED` | Đăng xuất |
+| **Tài khoản hết hạn sử dụng** | `connect_error` | `ACCOUNT_EXPIRED` | **Không kết nối lại**; màn hình "Tài khoản đã hết hạn" (xem `ADMIN_PERMISSIONS.md`) |
+| Không có quyền truy cập tour | `tour-error` | – | Hiển thị "Bạn không có quyền xem tour này" |
+| Tour không tồn tại | `tour-error` | – | Hiển thị "Tour không tồn tại" |
+| Mất kết nối mạng | `disconnect` | – | Socket.IO tự reconnect, gửi lại `join-tour` |
+
+> Khi server từ chối ở bước xác thực (`connect_error`), Socket.IO client **không tự reconnect**. Muốn thử lại (vd sau khi refresh token) phải gọi `socket.connect()`.
 
 ### 8.2. Reconnect handler
 
 ```typescript
 socket.on('connect', () => {
-  // Sau khi reconnect, join lại room
+  // Chỉ chạy khi đã xác thực xong → join ngay (cả lần đầu và sau khi reconnect)
   socket.emit('join-tour', { tourId: currentTourId });
+});
+
+socket.on('connect_error', async (err: Error & { data?: { code?: string } }) => {
+  if (err.data?.code === 'ACCOUNT_EXPIRED') return; // không thử lại
+  if (err.data?.code === 'UNAUTHORIZED' && (await tryRefreshToken())) {
+    socket.auth = { token: getAccessToken() }; // token mới
+    socket.connect();                           // kết nối lại thủ công
+  }
 });
 ```
 
@@ -561,6 +590,11 @@ export interface TourLevelData {
 export interface TourError {
   message: string;
 }
+
+/** Lỗi xác thực khi kết nối – nhận qua socket.on('connect_error', …) */
+export type SocketAuthError = Error & {
+  data?: { code: 'UNAUTHORIZED' | 'ACCOUNT_EXPIRED' };
+};
 
 // ===== Event map (Socket.IO typed) =====
 

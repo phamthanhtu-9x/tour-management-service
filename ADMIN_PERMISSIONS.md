@@ -166,11 +166,16 @@ export const formatUsage = (used: number, max: number | null) =>
 ```
 
 - Ở trang đăng nhập: lỗi này chỉ xuất hiện khi **đúng mật khẩu** (sai mật khẩu vẫn báo "Incorrect password").
-- **WebSocket**: server gửi `tour-error` rồi ngắt kết nối:
-  ```json
-  { "message": "Tài khoản đã hết hạn sử dụng. Vui lòng liên hệ quản trị viên để gia hạn", "code": "ACCOUNT_EXPIRED" }
+- **WebSocket**: server từ chối ngay ở bước kết nối → client nhận **`connect_error`** (không nhận `connect`):
+  ```typescript
+  socket.on('connect_error', (err: Error & { data?: { code?: string } }) => {
+    if (err.data?.code === 'ACCOUNT_EXPIRED') {
+      // err.message: "Tài khoản đã hết hạn sử dụng. Vui lòng liên hệ quản trị viên để gia hạn"
+      // Socket.IO client không tự reconnect trong trường hợp này – đừng gọi socket.connect()
+      router.replace('/account-expired');
+    }
+  });
   ```
-  → **không reconnect** khi nhận `code: 'ACCOUNT_EXPIRED'`.
 
 Xử lý gợi ý (axios interceptor): xoá token, chuyển về màn hình "Tài khoản đã hết hạn" (khác màn hình đăng nhập lỗi, để user biết cần liên hệ gia hạn):
 
@@ -385,6 +390,6 @@ npm run admin:promote -- tu@gmail.com
 - [ ] Gọi `GET /users/me/limits` để hiển thị mức dùng và khoá nút Thêm player / Tạo tour / Start / Xuất Excel.
 - [ ] Bắt lỗi `403` có `details.code` = `PLAN_LIMIT` / `PLAN_FEATURE` → hiện thông báo nâng cấp.
 - [ ] Gọi lại `/users/me/limits` sau các thao tác làm thay đổi số lượng.
-- [ ] Bắt `403` `ACCOUNT_EXPIRED` (đăng nhập, mọi API, WebSocket `tour-error`) → xoá token, màn hình "Tài khoản đã hết hạn", không reconnect socket.
+- [ ] Bắt `403` `ACCOUNT_EXPIRED` (đăng nhập, mọi API) và WebSocket `connect_error` có `err.data.code === 'ACCOUNT_EXPIRED'` → xoá token, màn hình "Tài khoản đã hết hạn", không kết nối lại socket.
 - [ ] Hiện banner khi `daysLeft` ≤ 3 (STANDARD vừa bị hạ xuống TRIAL sẽ có `role: "TRIAL"`, `daysLeft` ≤ 5).
 - [ ] Trang quản trị: danh sách user (cột hạn sử dụng, lọc `status` / `expiringInDays`), đổi gói + gia hạn (ẩn với super admin), form cấu hình 2 gói (có `durationDays`).
